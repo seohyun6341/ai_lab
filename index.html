@@ -110,7 +110,7 @@ ol.tl .intro li{display:list-item;padding:0;margin:2px 0}
 .seg{display:inline-flex;background:var(--lake2);border-radius:14px;padding:4px;gap:4px;margin:0 0 16px}
 .seg button{border:0;background:none;border-radius:10px;padding:8px 22px;min-height:42px;font-size:16px;font-weight:600;cursor:pointer;color:var(--mute)}
 .seg button.on{background:var(--lake);color:#fff}
-.regions{font-size:14px;color:var(--mute);margin:-8px 0 18px}.regions b{display:inline-block;background:var(--lake2);color:var(--ink);border-radius:99px;padding:1px 10px;margin-left:4px;font-weight:600}
+.regions{display:flex;flex-wrap:wrap;align-items:center;gap:6px;font-size:14px;color:var(--mute);margin:-8px 0 18px}.regions button{border:1.5px solid var(--line);background:var(--lake2);color:var(--ink);border-radius:99px;padding:4px 16px;min-height:40px;font-size:15px;font-weight:600;cursor:pointer}.regions button.on{background:var(--lake);border-color:var(--lake);color:#fff}.regions button:focus-visible{outline:3px solid var(--coral);outline-offset:2px}
 .row2{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px}
 .btn{display:block;width:100%;min-height:52px;border:0;border-radius:14px;background:var(--lake);color:#fff;font-weight:700;font-size:17px;cursor:pointer;margin-top:10px}
 .btn.ghost{background:var(--lake2);color:var(--ink)}.btn.coral{background:var(--coral)}
@@ -640,7 +640,7 @@ const screens={
  home(){const td=saved.find(t=>t.date===today||(t.days&&t.days.some(d=>d.date===today)));
   const pre=`<button class="mode" data-act="go" data-to="pre1">${illoPre}<div><b>여행 전</b><span>키워드만 고르면 버스 시간에 맞춘 하루 코스를 짜 드려요</span></div></button>`;
   const dur=`<button class="mode${td?' hot':''}" data-act="tripEntry">${illoDur}<div>${td?'<span class="tag">오늘 여행</span>':''}<b>여행 중</b><span>${td?esc(td.title)+' · 남은 일정과 다음 버스 확인':'지금 있는 곳에서 바로 일정 받기, 중간에 키워드로 바꾸기'}</span></div></button>`;
-  return`<h1>오시드래요!<br>어떤 여행을 도와드릴까요?</h1><p class="lead">버스가 한두 시간에 한 대뿐인 강원도, 시간 맞추기는 저희가 할게요.</p><p class="regions">지금 쓸 수 있는 지역 <b>춘천</b> <b>강릉</b></p>${td?dur+pre:pre+dur}<button class="mode lite" data-act="go" data-to="spots"><span class="lic" aria-hidden="true"></span><div><b>여행지 둘러보기</b><span>춘천·강릉에서 버스로 갈 수 있는 곳 소개</span></div></button>
+  return`<h1>오시드래요!<br>어떤 여행을 도와드릴까요?</h1><p class="lead">버스가 한두 시간에 한 대뿐인 강원도, 시간 맞추기는 저희가 할게요.</p><div class="regions" role="radiogroup" aria-label="여행 지역">지금 쓸 수 있는 지역 ${Object.values(REG).map(r=>`<button role="radio" aria-checked="${r.id===REGION.id}" class="${r.id===REGION.id?'on':''}" data-act="region" data-r="${r.id}">${r.name}</button>`).join('')}</div>${td?dur+pre:pre+dur}<button class="mode lite" data-act="go" data-to="spots"><span class="lic" aria-hidden="true"></span><div><b>여행지 둘러보기</b><span>춘천·강릉에서 버스로 갈 수 있는 곳 소개</span></div></button>
   ${saved.length?`<h2>저장한 일정</h2>${saved.map((t,i)=>`<div class="saved"><div><b>${esc(t.title)}</b><br><small>${REG[t.region||'cc'].name} · ${t.multi?DUR[t.days.length-1]+' · ':''}${t.date} · ${esc(t.origin||'')} ${t.start} 출발 · ${t.seq.length}곳</small></div><button class="mini" data-act="openSaved" data-i="${i}">여행 시작</button><button class="mini" data-act="delSaved" data-i="${i}">삭제</button></div>`).join('')}`:''}
   <p class="foot">버스 시간표·노선 번호와 근처 가게 이름은 화면 시연용 예시입니다. 정식 버전은 국토교통부 TAGO 버스 정보와 지자체 시간표를 연결합니다.</p>`},
  spots(){const f=S.spotTag||'';const tags=[...new Set(P.flatMap(p=>p.tags))];const list=P.filter(p=>!f||p.tags.includes(f));
