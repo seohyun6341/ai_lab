@@ -1,0 +1,906 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>E-번에 타자</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+/* VOICE: 친근한 강원 사투리 인사, 화면은 실제 출시 앱처럼 차분하고 또렷하게
+   IDEA: 버스 정류장 시간표 + 지하철 노선도식 단선 타임라인
+   PICTURE: 큰 시각이 왼쪽에 걸린 세로 노선 타임라인, 다음 버스 카운트다운
+   COLOUR and TYPE: 소양강 물빛 파랑 바탕, 흰 종이, 버스 경고용 코랄 하나 / IBM Plex Sans KR
+   LAYOUT: 휴대폰 폭 한 열, 넓은 화면에서는 가운데 정렬 */
+:root{color-scheme:light dark;
+--lake:light-dark(#0b5d8f,#0d4a70);--lake2:light-dark(#e3f0f8,#132a3a);
+--bg:light-dark(#0b5d8f,#081621);--paper:light-dark(#ffffff,#0f1f2b);
+--ink:light-dark(#10212d,#e8f0f5);--mute:light-dark(#566978,#9bb0bf);
+--line:light-dark(#d8e3ea,#24394a);--coral:#ff5a3c;--coral2:light-dark(#fff0ec,#3a1d16);
+--ok:light-dark(#0c7f6e,#4fd1b5);--ok2:light-dark(#e2f5f1,#123430);
+--warn:light-dark(#b45c00,#ffb15c);--warn2:light-dark(#fff3e2,#3a2a14)}
+:root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
+*{box-sizing:border-box;min-width:0}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 "IBM Plex Sans KR",system-ui,sans-serif;overflow-x:clip}
+button,input,select{font:inherit;color:inherit}
+.top{max-width:520px;margin:0 auto;padding:18px 20px 14px;color:#fff;display:flex;align-items:center;gap:10px}
+.top b{font-size:19px;letter-spacing:-.01em}.top small{margin-left:auto;font-size:13px;opacity:.8}
+.top button{background:none;border:0;color:#fff;padding:6px 8px 6px 0;min-height:44px;cursor:pointer;font-size:15px}
+#app{max-width:520px;margin:0 auto;background:var(--paper);min-height:calc(100vh - 72px);border-radius:22px 22px 0 0;padding:24px 20px 140px;position:relative}
+h1{word-break:keep-all;font-size:30px;line-height:1.15;margin:4px 0 6px;text-wrap:balance;letter-spacing:-.02em}
+h2{font-size:20px;margin:26px 0 10px}
+p.lead{word-break:keep-all;color:var(--mute);margin:0 0 20px}
+.mode{display:grid;grid-template-columns:96px 1fr;gap:14px;align-items:center;width:100%;text-align:left;border:1.5px solid var(--line);background:var(--paper);border-radius:18px;padding:16px;margin:0 0 12px;cursor:pointer}
+.mode:hover,.mode:focus-visible{border-color:var(--lake)}
+.mode b{display:block;font-size:22px}.mode span{color:var(--mute);font-size:15px}
+.mode.hot{border-color:var(--coral);box-shadow:0 0 0 3px var(--coral2)}
+.mode .tag{display:inline-block;background:var(--coral);color:#fff;font-size:13px;border-radius:99px;padding:1px 9px;margin-bottom:4px}
+.mode svg{width:96px;height:80px}
+.saved{border-top:1px solid var(--line);padding:12px 0;display:flex;gap:10px;align-items:center}
+.saved div{flex:1}.saved small{color:var(--mute)}
+label.f{display:block;margin:0 0 14px;font-weight:600;font-size:15px}
+label.f input,label.f select{display:block;width:100%;margin-top:6px;font-size:16px;padding:12px;border:1.5px solid var(--line);border-radius:12px;background:var(--paper);min-height:48px}
+.f .fl{display:block;font-weight:600;font-size:15px;margin-bottom:6px}
+.picked{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;background:var(--lake2);border-radius:12px;padding:10px 12px;margin-bottom:8px}.picked b{font-size:18px}.picked small{color:var(--mute);font-size:14px}
+.search{display:block;width:100%;font-size:16px;padding:12px 14px;border:1.5px solid var(--line);border-radius:12px;background:var(--paper);min-height:48px}
+.opts[hidden]{display:none}.opts{border:1.5px solid var(--line);border-radius:12px;margin-top:6px;max-height:268px;overflow:auto}
+.opt{display:block;width:100%;text-align:left;background:none;border:0;border-bottom:1px solid var(--line);padding:9px 12px;cursor:pointer;min-height:48px}.opt:last-child{border-bottom:0}
+.opt b{display:block;font-size:16px;font-weight:600}.opt small{color:var(--mute);font-size:13px}.opt.on{background:var(--lake2)}.opt:hover{background:var(--lake2)}
+div.f{margin:0 0 16px}
+.perm{border:2px solid var(--lake);border-radius:18px;padding:16px;margin:0 0 14px}.perm b{font-size:18px}.perm p{margin:4px 0 6px;color:var(--mute);font-size:15px}.perm .btn{margin-top:4px}
+.loc{display:grid;grid-template-columns:22px 1fr auto;gap:10px;align-items:start;background:var(--lake2);border-radius:16px;padding:12px 14px;margin:0 0 10px}
+.loc b{font-size:16px}.loc small{display:block;color:var(--mute);font-size:13px}.loc p{margin:4px 0 0;font-size:15px}.loc p.note{font-size:13px;color:var(--mute)}
+.pin{display:inline-block;width:16px;height:16px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);background:var(--coral);margin:4px 0 0 3px;flex:none}
+.locbtn{display:flex;align-items:center;justify-content:center;gap:10px;margin:0 0 8px;min-height:48px}.locmsg{margin:0 0 10px}
+.lwarn{background:var(--coral);color:#fff;border-radius:12px;padding:10px 12px;font-weight:700;margin:0 0 12px}.lwarn .mini{color:#fff;display:block;font-weight:600}
+.rno{display:inline-block;background:var(--lake);color:#fff;border-radius:6px;padding:0 7px;font-size:14px;margin-right:2px;font-variant-numeric:tabular-nums}.rno.w{background:#fff;color:var(--lake)}
+.drtbtn{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px;margin-top:6px}.drtbtn .btn{display:flex;align-items:center;justify-content:center;text-decoration:none;margin:0;min-height:48px;font-size:15px}
+.card p.note{font-size:13px}.card.drt{border-color:var(--lake)}
+.sunl{display:flex;align-items:center;gap:6px;flex-wrap:wrap;font-size:15px;color:var(--mute);margin:-6px 0 14px}.sunl b{color:var(--ink);font-variant-numeric:tabular-nums;margin-right:8px}
+.sr,.ss{display:inline-block;width:18px;height:9px;border-radius:18px 18px 0 0;background:#ff9a3c;border-bottom:2px solid var(--mute)}.ss{background:#e8553b}
+.b-sun{background:light-dark(#fff1e0,#3a2614);color:light-dark(#b4501a,#ffb27a)}
+.mini.w{color:#fff;display:block;font-weight:700}
+.mic{flex:none;width:48px;min-height:48px;border-radius:14px;border:1.5px solid var(--line);background:var(--paper);color:var(--lake);display:grid;place-items:center;cursor:pointer;padding:0}
+.mic.on{background:var(--coral);border-color:var(--coral);color:#fff;animation:pulse 1.2s ease-in-out infinite}
+@keyframes pulse{50%{box-shadow:0 0 0 6px var(--coral2)}}@media(prefers-reduced-motion:reduce){.mic.on{animation:none}}
+.dock .hint{margin:4px 2px 0}.dock .textin{margin:6px 0 0}
+.sunok{background:var(--ok2);color:var(--ok);border-radius:12px;padding:10px 12px;font-weight:600;margin:0 0 12px}
+.tin{display:block;width:100%;font-size:16px;padding:12px;border:1.5px solid var(--line);border-radius:12px;background:var(--paper);min-height:48px}.tin:disabled{opacity:.45}
+.undec{display:flex;align-items:center;gap:6px;font-size:14px;color:var(--mute);margin-top:8px;min-height:32px;cursor:pointer}.undec input{width:20px;height:20px;accent-color:var(--lake)}
+.stops{display:grid;gap:2px;margin:4px 0 2px;font-size:14px;color:var(--ink)}.stops i{font-style:normal;display:inline-block;font-size:12px;color:var(--mute);border:1px solid var(--line);border-radius:6px;padding:0 6px;margin-right:6px}.stops i.on{color:var(--lake);border-color:var(--lake)}
+.live{background:var(--paper);border:1.5px solid var(--line);border-radius:14px;padding:10px 12px;margin:0 0 10px}.lvh{margin:0 0 6px;font-size:14px;font-weight:700;display:flex;align-items:center;gap:6px}
+.lvdot{width:8px;height:8px;border-radius:50%;background:#18b36b;box-shadow:0 0 0 3px rgba(24,179,107,.2)}.lvl{list-style:none;margin:0;padding:0;display:grid;gap:4px}.lvl li{display:flex;align-items:center;gap:8px;font-size:15px}.lvl li span:last-child{color:var(--mute);font-size:13px;margin-left:auto}
+.lvwait,.lverr{margin:0;font-size:13px;color:var(--mute)}.lverr{color:var(--coral)}
+.guide{border:2px solid var(--lake);border-radius:18px;padding:14px;margin:0 0 12px}
+.gh .gk{display:inline-block;background:var(--lake);color:#fff;font-size:12px;font-weight:700;border-radius:99px;padding:1px 9px;margin-bottom:4px}
+.gh b{display:block;font-size:19px;line-height:1.3}.gh p{margin:2px 0 8px;color:var(--mute);font-size:15px}
+.gdir{display:flex;align-items:center;gap:12px;background:var(--coral2);border-radius:14px;padding:10px 12px;margin:0 0 10px}.gdir b{font-size:18px}.gdir p{margin:0;font-size:14px;color:var(--ink)}
+.garr{flex:none;width:44px;height:44px;border-radius:50%;background:var(--coral);color:#fff;display:grid;place-items:center;font-size:26px;font-weight:700;line-height:1}
+.gnow{background:var(--ok2);color:var(--ok);font-weight:700;border-radius:12px;padding:10px 12px;margin:0 0 10px}.gnote{font-size:14px;color:var(--mute);margin:0 0 10px}
+.gsvg{display:block;width:100%;height:auto}.kmap.g{height:220px}.gfoot{font-size:12px;color:var(--mute);margin:6px 0 0}
+.kstop{background:#0b5d8f;color:#fff;font:700 12px/1 'IBM Plex Sans KR',sans-serif;padding:6px 9px;border-radius:8px;white-space:nowrap;margin-bottom:6px}
+.edcmd{border:2px solid var(--lake);border-radius:16px;padding:14px;margin:0 0 16px}.edcmd>b{font-size:17px}.edcmd>p{margin:4px 0 6px;font-size:14px;color:var(--mute)}
+.edlog{list-style:none;margin:8px 0 0;padding:0;display:grid;gap:4px}.edlog li{font-size:14px;background:var(--ok2);color:var(--ok);border-radius:8px;padding:6px 10px;font-weight:600}.edlog li.bad{background:var(--coral2);color:var(--coral)}
+.edopts{display:flex;gap:14px;margin-top:6px}
+.edbtn{margin:0 0 14px}.edbar{border:2px dashed var(--lake);border-radius:16px;padding:14px;margin:0 0 16px}.edbar b{font-size:17px}.edbar p{margin:4px 0 10px;font-size:14px;color:var(--mute)}.edbar p.alert{color:#fff}.edbar .btn{margin-top:0}
+.ectl{display:grid;gap:6px;margin-top:8px}.erow{display:flex;flex-wrap:wrap;align-items:center;gap:6px;font-size:14px;color:var(--mute);font-weight:400}
+.erow button{border:1px solid var(--line);background:var(--paper);border-radius:10px;min-height:38px;min-width:40px;padding:4px 10px;cursor:pointer;font-size:14px;color:var(--ink)}.erow button:disabled{opacity:.35}.erow button.del{color:var(--coral);border-color:var(--coral)}
+.erow b{font-size:15px;color:var(--ink);min-width:44px;text-align:center}.erow input{font-size:16px;padding:6px 8px;border:1.5px solid var(--line);border-radius:10px;background:var(--paper);min-height:38px}
+.late{color:var(--coral);font-weight:700}
+.b-me{background:var(--lake2);color:var(--lake)}
+.rmap{margin:0 0 18px}.kmap{width:100%;height:260px;border-radius:14px;overflow:hidden;background:var(--lake2)}
+.kpin{width:24px;height:24px;border-radius:50%;background:#fff;border:3px solid #0b5d8f;color:#10212d;font:700 12px/18px 'IBM Plex Sans KR',sans-serif;text-align:center}.kpin.hub{border-radius:6px;background:#0b5d8f;color:#fff}
+.kme{width:16px;height:16px;border-radius:50%;background:#ff5a3c;border:3px solid #fff;box-shadow:0 0 0 8px rgba(255,90,60,.2)}.rmap svg{display:block;width:100%;height:auto}.rmap figcaption{font-size:13px;color:var(--mute);margin-top:8px}
+.mleg{list-style:none;margin:0 0 6px;padding:0;display:flex;flex-wrap:wrap;gap:4px 12px}.mleg li{font-size:14px;color:var(--ink)}.mleg b{display:inline-grid;place-items:center;width:20px;height:20px;border-radius:50%;background:var(--lake);color:#fff;font-size:11px;margin-right:4px}
+.seg.dur{display:flex;width:100%}.seg.dur button{flex:1;padding:8px 6px}
+.mode.lite{grid-template-columns:44px 1fr;padding:12px 16px}.mode.lite b{font-size:18px}.lic{width:36px;height:36px;border-radius:10px;background:var(--lake2);position:relative}.lic::after{content:"";position:absolute;left:11px;top:7px;width:14px;height:14px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);background:var(--lake)}
+.spot{border:1.5px solid var(--line);border-radius:18px;padding:16px;margin:0 0 14px}.sph{display:flex;flex-wrap:wrap;align-items:center;gap:6px}.sph b{font-size:19px;margin-right:4px}.sph .badge{margin:0}
+.spd{margin:8px 0;font-size:15.5px}.sph2{margin:0 0 8px;padding-left:18px;font-size:15px}.sph2 li{margin:2px 0}
+.spm{margin:4px 0;font-size:15px;display:flex;gap:8px;align-items:baseline}.spm span:first-child{flex:none;font-size:13px;color:var(--mute);width:62px}
+.sptip{background:var(--lake2);border-radius:10px;padding:8px 10px;font-size:14px;margin:8px 0}.sptags{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0 0}.sptags span{font-size:13px;color:var(--lake)}
+.spgo{margin-top:10px;min-height:46px;font-size:16px}.spf{margin:0 0 16px}
+.plink{border:0;background:none;padding:0;font:inherit;color:inherit;text-decoration:underline;text-decoration-color:var(--line);text-underline-offset:3px;cursor:pointer;text-align:left}
+.intro{display:block;margin:8px 0 2px;background:var(--lake2);border-radius:12px;color:var(--ink)}
+.intro summary{cursor:pointer;list-style:none;padding:10px 12px;font-size:15px;font-weight:700;color:var(--lake);min-height:44px;display:flex;align-items:center;gap:6px}
+.intro summary::-webkit-details-marker{display:none}.intro summary::before{content:"";border:6px solid transparent;border-left:8px solid var(--lake);border-right:0;transition:transform .15s}
+.intro[open] summary::before{transform:rotate(90deg)}@media(prefers-reduced-motion:reduce){.intro summary::before{transition:none}}
+ol.tl .intro li{display:list-item;padding:0;margin:2px 0}
+.intro p{margin:0 12px 8px;font-size:15px;line-height:1.55}.intro ul{margin:0 12px 8px;padding-left:18px;font-size:14.5px}.intro li{margin:2px 0}
+.intro .itip{font-size:14px;color:var(--mute);border-top:1px solid var(--line);padding-top:8px;margin-bottom:0;padding-bottom:10px}
+.seg{display:inline-flex;background:var(--lake2);border-radius:14px;padding:4px;gap:4px;margin:0 0 16px}
+.seg button{border:0;background:none;border-radius:10px;padding:8px 22px;min-height:42px;font-size:16px;font-weight:600;cursor:pointer;color:var(--mute)}
+.seg button.on{background:var(--lake);color:#fff}
+.regions{font-size:14px;color:var(--mute);margin:-8px 0 18px}.regions b{display:inline-block;background:var(--lake2);color:var(--ink);border-radius:99px;padding:1px 10px;margin-left:4px;font-weight:600}
+.row2{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px}
+.btn{display:block;width:100%;min-height:52px;border:0;border-radius:14px;background:var(--lake);color:#fff;font-weight:700;font-size:17px;cursor:pointer;margin-top:10px}
+.btn.ghost{background:var(--lake2);color:var(--ink)}.btn.coral{background:var(--coral)}
+.btn:focus-visible,.chip:focus-visible,.mode:focus-visible,input:focus-visible{outline:3px solid var(--coral);outline-offset:2px}
+.grp{margin:0 0 16px}.grp h3{font-size:14px;color:var(--mute);margin:0 0 8px;font-weight:600}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{border:1.5px solid var(--line);background:var(--paper);border-radius:99px;padding:8px 14px;min-height:40px;cursor:pointer;font-size:15px}
+.chip.on{background:var(--lake);border-color:var(--lake);color:#fff}
+.textin{display:flex;gap:8px;margin:6px 0 4px}
+.textin input{flex:1;font-size:16px;padding:12px 14px;border:1.5px solid var(--line);border-radius:14px;background:var(--paper);min-height:48px}
+.textin button{border:0;background:var(--lake);color:#fff;border-radius:14px;padding:0 16px;font-weight:700;cursor:pointer;min-width:64px}
+.hint{font-size:14px;color:var(--mute);margin:6px 0 0}
+.tabs{display:flex;gap:6px;margin:0 0 14px;overflow-x:auto}
+.tabs button{flex:1;border:1.5px solid var(--line);background:var(--paper);border-radius:12px;padding:10px 8px;cursor:pointer;min-height:48px;font-size:15px;white-space:nowrap}
+.tabs button.on{border-color:var(--lake);background:var(--lake2);font-weight:700}
+.sum{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:15px;color:var(--mute);margin:0 0 6px}.sum b{color:var(--ink)}
+.why{font-size:14px;background:var(--lake2);border-radius:12px;padding:10px 12px;margin:0 0 14px}
+ol.tl{list-style:none;margin:0;padding:0;position:relative}
+ol.tl li{display:grid;grid-template-columns:62px 22px 1fr;gap:0 8px;position:relative;padding:0 0 14px}
+ol.tl li .t{font-size:18px;font-weight:700;text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap;line-height:1.3}
+ol.tl li .dot{position:relative}
+ol.tl li .dot::before{content:"";position:absolute;left:10px;top:0;bottom:-14px;width:2px;background:var(--line)}
+ol.tl li:last-child .dot::before{display:none}
+ol.tl li .dot i{position:absolute;left:4px;top:5px;width:14px;height:14px;border-radius:50%;background:var(--paper);border:3px solid var(--lake)}
+ol.tl li.bus .dot i{border-radius:4px;background:var(--lake)}
+ol.tl li.walk .dot i{width:10px;height:10px;left:6px;top:7px;border-width:2px;border-color:var(--mute)}
+ol.tl li .c{font-size:15px;color:var(--mute);padding-bottom:2px}
+ol.tl li .c b{display:block;color:var(--ink);font-size:17px}
+ol.tl li.stay .c b{font-size:19px}
+ol.tl li.done{opacity:.45}
+ol.tl li.now .dot i{border-color:var(--coral);box-shadow:0 0 0 5px var(--coral2)}
+ol.tl li.now .c b::after{content:" · 지금";color:var(--coral);font-size:14px}
+.badge{display:inline-block;font-size:13px;border-radius:99px;padding:1px 9px;margin:4px 6px 0 0;white-space:nowrap}
+.b-ok{background:var(--ok2);color:var(--ok)}.b-warn{background:var(--warn2);color:var(--warn)}.b-bad{background:var(--coral2);color:var(--coral)}
+.extra{display:block;font-size:14px;color:var(--ink);margin-top:3px}
+.mini{border:0;background:none;color:var(--mute);text-decoration:underline;cursor:pointer;font-size:14px;padding:6px 0;min-height:32px}
+.status{background:var(--lake);color:#fff;border-radius:20px;padding:18px;margin:0 0 14px}
+.status .where{font-size:15px;opacity:.9}
+.status .big{display:flex;align-items:baseline;gap:8px;margin:6px 0 2px}
+.status .big strong{font-size:clamp(44px,13vw,60px);line-height:1;font-variant-numeric:tabular-nums}
+.status .big span{font-size:17px}
+.status .sub{font-size:15px;opacity:.9}
+.alert{background:var(--coral);color:#fff;border-radius:12px;padding:10px 12px;font-weight:700;margin:10px 0 0}
+.demo{display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-size:14px;color:var(--mute);border:1.5px dashed var(--line);border-radius:14px;padding:10px;margin:0 0 18px}
+.demo b{color:var(--ink);font-variant-numeric:tabular-nums}
+.demo button{border:1px solid var(--line);background:var(--paper);border-radius:10px;padding:6px 10px;cursor:pointer;min-height:38px;font-size:14px}
+.demo .x{border-color:var(--coral);color:var(--coral)}
+.dock{position:fixed;left:0;right:0;bottom:0;z-index:5}
+.dock>div{max-width:520px;margin:0 auto;background:var(--paper);border-top:1px solid var(--line);padding:10px 14px calc(12px + env(safe-area-inset-bottom));box-shadow:0 -6px 20px rgba(0,0,0,.08)}
+.dock .chips{flex-wrap:nowrap;overflow-x:auto;padding-bottom:4px}.dock .chip{flex:none;padding:6px 12px;min-height:36px;font-size:14px}
+.miss{display:block;width:100%;border:0;background:var(--coral);color:#fff;font-weight:700;border-radius:14px;min-height:50px;font-size:17px;cursor:pointer;margin:0 0 14px}
+.scrim{position:fixed;inset:0;background:rgba(5,20,30,.5);z-index:9;display:flex;align-items:flex-end;justify-content:center}
+.sheet{background:var(--paper);width:100%;max-width:520px;max-height:86vh;overflow:auto;border-radius:22px 22px 0 0;padding:20px 18px calc(24px + env(safe-area-inset-bottom));animation:up .22s ease-out}
+@keyframes up{from{transform:translateY(40px);opacity:0}}
+@media(prefers-reduced-motion:reduce){.sheet{animation:none}}
+.sheet h2{margin:0 0 4px}.sheet .lead{margin-bottom:14px}
+.card{border:1.5px solid var(--line);border-radius:16px;padding:14px;margin:0 0 10px}
+.card b{display:block;font-size:17px;margin-bottom:2px}.card p{margin:2px 0;font-size:15px;color:var(--mute)}
+.card p.chg{color:var(--ink)}
+.card .btn{min-height:46px;font-size:16px}
+.empty{text-align:center;color:var(--mute);padding:30px 10px}
+.foot{font-size:13px;color:var(--mute);margin-top:28px;border-top:1px solid var(--line);padding-top:12px}
+.check{width:72px;height:72px;border-radius:50%;background:var(--ok2);color:var(--ok);display:grid;place-items:center;font-size:38px;margin:10px 0 14px}
+</style>
+</head>
+<body>
+<header class="top"><span id="back"></span><b>E-번에 타자</b><small>프로토타입 · 예시 시간표</small></header>
+<main id="app"></main>
+<div id="dock" class="dock"></div>
+<div id="layer"></div>
+
+<script id="logic">
+const tm=s=>{const[h,m]=s.split(':').map(Number);return h*60+m};
+const hm=t=>String(Math.floor(t/60)).padStart(2,'0')+':'+String(Math.round(t)%60).padStart(2,'0');
+const sch=(s,iv,n)=>Array.from({length:n},(_,i)=>tm(s)+i*iv);
+const near=(food,cafe,toilet,rest)=>[{n:food,type:'food',walk:5},{n:cafe,type:'cafe',walk:4},{n:toilet,type:'toilet',walk:2},{n:rest,type:'rest',walk:3}];
+/* 시연용 예시 데이터: 실제 노선·시간표·가게가 아님 */
+const REG={
+ cc:{id:'cc',name:'춘천',hub:{id:'hub',name:'춘천역',stop:'춘천역 환승센터',ll:[37.8847,127.7167],near:near('역 앞 식당가','역사 안 카페','역 화장실','역 맞이방(실내 대기실)')},
+  places:[
+ {id:'dam',ll:[37.9453,127.8136],re:/소양강댐|댐/,name:'소양강댐',tags:['자연','호수뷰','전망','사진','걷기'],stay:60,remote:{no:'11',ride:35,out:sch('08:30',60,11),ret:sch('09:20',60,11)},near:near('댐 아래 막국수집','전망 카페','정류장 옆 화장실','댐 관리동 쉼터')},
+ {id:'mun',ll:[37.818,127.718],re:/김유정|문학촌/,name:'김유정문학촌',tags:['문화','걷기','자연','체험'],stay:60,remote:{no:'67',ride:30,out:sch('08:50',90,7),ret:sch('09:40',90,7)},near:near('실레마을 밥집','마을 북카페','문학촌 화장실','전시관 로비')},
+ {id:'fall',ll:[37.806,127.643],re:/구곡|폭포/,name:'구곡폭포',tags:['자연','등산','걷기','사진'],stay:90,remote:{no:'50',ride:40,out:sch('08:40',150,4),ret:sch('09:50',150,4)},near:near('입구 감자전 가게','입구 찻집','주차장 화장실','매표소 쉼터')},
+ {id:'ani',ll:[37.871,127.687],re:/애니/,name:'애니메이션박물관',tags:['실내','체험','문화'],stay:70,indoor:1,remote:{no:'82',ride:25,out:sch('09:00',75,8),ret:sch('09:50',75,8)},near:near('박물관 푸드코트','로비 카페','박물관 화장실','관람객 휴게실')},
+ {id:'cable',ll:[37.8693,127.7083],re:/케이블카|삼악산/,name:'삼악산 호수케이블카',tags:['전망','호수뷰','사진','체험'],stay:60,remote:{no:'7',ride:20,out:sch('09:15',45,12),ret:sch('09:45',45,12)},near:near('승강장 분식','정상 카페','승강장 화장실','탑승동 대합실')},
+ {id:'noodle',ll:[37.903,127.759],re:/막국수/,name:'막국수체험박물관',tags:['막국수','체험','실내'],stay:50,meal:1,indoor:1,remote:{no:'13',ride:30,out:sch('09:30',100,6),ret:sch('10:15',100,6)},near:near('박물관 막국수 식당','앞마당 카페','박물관 화장실','체험관 로비')},
+ {id:'lego',ll:[37.8780,127.7030],re:/레고/,name:'레고랜드 코리아',tags:['테마파크','체험'],stay:240,remote:{no:'6',ride:20,out:sch('09:00',30,19),ret:sch('10:30',30,18)},near:near('정문 푸드코트','파크 안 카페','정문 화장실','정문 광장 쉼터')},
+ {id:'dak',ll:[37.881,127.728],re:/명동|닭갈비/,name:'명동 닭갈비골목',tags:['닭갈비'],stay:60,meal:1,indoor:1,walk:15,near:near('골목 안 닭갈비집','명동 카페','지하상가 화장실','지하상가 쉼터')},
+ {id:'market',ll:[37.882,127.7265],re:/중앙시장|낭만시장/,name:'춘천 중앙시장',tags:['시장 먹거리','실내'],stay:40,meal:1,indoor:1,walk:15,near:near('시장 국밥집','시장 커피집','시장 화장실','상인회 쉼터')},
+ {id:'yuk',ll:[37.88,127.7295],re:/육림/,name:'육림고개',tags:['카페','사진'],stay:40,walk:15,near:near('고개 아래 분식','골목 카페','공영 화장실','작은 책방')},
+ {id:'gong',ll:[37.87,127.716],re:/공지천/,name:'공지천',tags:['자연','호수뷰','걷기','카페'],stay:50,walk:20,near:near('호숫가 식당','공지천 카페거리','공원 화장실','조각공원 정자')},
+ {id:'sky',ll:[37.889,127.723],re:/스카이워크/,name:'소양강 스카이워크',tags:['호수뷰','전망','사진'],stay:30,walk:20,near:near('강변 닭갈비집','강변 카페','스카이워크 화장실','매표소 대기실')}
+],
+  origins:[
+ {name:'춘천역',ll:[37.8847,127.7167],kind:'기차역',min:0,al:['ITX','경춘선']},
+ {name:'남춘천역',ll:[37.864,127.724],kind:'기차역',min:15,al:['ITX','경춘선']},
+ {name:'김유정역',ll:[37.8183,127.7146],kind:'기차역',min:25,al:['경춘선']},
+ {name:'춘천시외버스터미널',ll:[37.863,127.723],kind:'버스터미널',min:15,al:['시외버스','터미널']},
+ {name:'춘천고속버스터미널',ll:[37.8636,127.7215],kind:'버스터미널',min:15,al:['고속버스','터미널']},
+ {name:'강원대학교',ll:[37.869,127.744],kind:'대학교',min:20,al:['강원대','강대']},
+ {name:'한림대학교',ll:[37.886,127.738],kind:'대학교',min:15,al:['한림대']},
+ {name:'명동·브라운5번가',ll:[37.881,127.729],kind:'시내',min:10,al:['명동','시내']},
+ {name:'춘천시청',ll:[37.8813,127.73],kind:'시내',min:12,al:['시청']},
+ {name:'효자동',ll:[37.87,127.737],kind:'동네',min:15,al:[]},
+ {name:'후평동',ll:[37.88,127.752],kind:'동네',min:20,al:[]},
+ {name:'퇴계동',ll:[37.855,127.73],kind:'동네',min:20,al:[]},
+ {name:'석사동',ll:[37.86,127.747],kind:'동네',min:20,al:[]},
+ {name:'온의동',ll:[37.865,127.718],kind:'동네',min:15,al:[]},
+ {name:'레고랜드 코리아',ll:[37.878,127.703],kind:'관광지',min:25,pid:'lego',al:['레고랜드','중도']},
+ {name:'공지천',ll:[37.87,127.716],kind:'관광지',min:20,pid:'gong',al:[]},
+ {name:'육림고개',ll:[37.88,127.7295],kind:'관광지',min:15,pid:'yuk',al:[]},
+ {name:'춘천 중앙시장',ll:[37.882,127.7265],kind:'관광지',min:15,pid:'market',al:['낭만시장','중앙시장']},
+ {name:'의암호 주변 숙소',ll:[37.875,127.7],kind:'숙소',min:25,al:['호텔','펜션','숙소']}
+]},
+ gn:{id:'gn',name:'강릉',hub:{id:'hub',name:'강릉역',stop:'강릉역 정류장',ll:[37.7639,128.8996],near:near('역 앞 식당가','역사 안 카페','역 화장실','역 맞이방(실내 대기실)')},
+  places:[
+ {id:'gyeongpo',ll:[37.8055,128.908],re:/경포/,name:'경포해변·경포호',tags:['바다','호수뷰','자연','걷기','사진'],stay:70,remote:{no:'202',ride:25,out:sch('08:40',40,15),ret:sch('09:10',40,15)},near:near('해변 횟집','해변 카페','해변 공중화장실','경포호 쉼터')},
+ {id:'anmok',ll:[37.7722,128.948],re:/안목|커피거리/,name:'안목해변 커피거리',tags:['바다','카페','사진'],stay:60,remote:{no:'230',ride:20,out:sch('08:50',30,20),ret:sch('09:20',30,20)},near:near('해변 분식집','바다 앞 카페','해변 화장실','카페 거리 쉼터')},
+ {id:'ojuk',ll:[37.7792,128.8786],re:/오죽헌/,name:'오죽헌',tags:['문화','걷기','사진'],stay:60,remote:{no:'300',ride:20,out:sch('09:00',50,11),ret:sch('09:35',50,11)},near:near('오죽헌 앞 식당','시립박물관 카페','관람객 화장실','시립박물관 로비')},
+ {id:'seongyo',ll:[37.786,128.884],re:/선교장/,name:'선교장',tags:['문화','사진','자연'],stay:50,remote:{no:'202-1',ride:25,out:sch('09:20',70,8),ret:sch('10:05',70,8)},near:near('입구 한식당','한옥 찻집','관람객 화장실','활래정 정자')},
+ {id:'chodang',ll:[37.79,128.914],re:/초당|순두부/,name:'초당순두부마을',tags:['순두부'],stay:50,meal:1,indoor:1,remote:{no:'206',ride:20,out:sch('08:30',40,16),ret:sch('09:00',40,16)},near:near('순두부 식당','마을 젤라또 카페','마을 공영화장실','솔밭 쉼터')},
+ {id:'sori',ll:[37.793,128.897],re:/참소리|축음기/,name:'참소리축음기박물관',tags:['실내','체험','문화'],stay:60,indoor:1,remote:{no:'202',ride:25,out:sch('09:10',40,14),ret:sch('09:40',40,14)},near:near('박물관 앞 식당','박물관 카페','박물관 화장실','관람객 휴게실')},
+ {id:'jumunjin',ll:[37.893,128.827],re:/주문진/,name:'주문진 수산시장',tags:['시장 먹거리','바다'],stay:70,meal:1,remote:{no:'300-1',ride:40,out:sch('08:30',60,11),ret:sch('09:20',60,11)},near:near('시장 회센터','항구 카페','시장 화장실','어민 쉼터')},
+ {id:'jeongdong',ll:[37.691,129.034],re:/정동진/,name:'정동진',tags:['바다','사진','전망'],stay:80,remote:{no:'109',ride:45,out:sch('08:20',120,5),ret:sch('09:40',120,5)},near:near('역 앞 식당','바다 전망 카페','역 화장실','정동진역 대합실')},
+ {id:'haslla',ll:[37.705,129.013],re:/하슬라/,name:'하슬라아트월드',tags:['문화','전망','바다','실내'],stay:90,indoor:1,remote:{no:'112',ride:40,out:sch('09:00',120,5),ret:sch('10:10',120,5)},near:near('미술관 레스토랑','미술관 카페','미술관 화장실','전망 라운지')},
+ {id:'jungang',ll:[37.754,128.899],re:/강릉.*중앙시장|중앙시장/,name:'강릉 중앙시장',tags:['시장 먹거리','실내'],stay:40,meal:1,indoor:1,walk:15,near:near('시장 장칼국수집','시장 커피집','시장 화장실','상인회 쉼터')},
+ {id:'myeongju',ll:[37.753,128.894],re:/명주동/,name:'명주동 골목',tags:['카페','사진','문화'],stay:40,walk:15,near:near('골목 국숫집','적산가옥 카페','공영 화장실','작은 공연장 로비')},
+ {id:'wolhwa',ll:[37.757,128.899],re:/월화/,name:'월화거리',tags:['걷기','사진'],stay:30,walk:10,near:near('거리 분식','거리 카페','공원 화장실','월화교 쉼터')}
+],
+  origins:[
+ {name:'강릉역',ll:[37.7639,128.8996],kind:'기차역',min:0,al:['KTX','강릉선']},
+ {name:'정동진역',ll:[37.6912,129.0342],kind:'기차역',min:45,al:['정동진']},
+ {name:'강릉 시외·고속버스터미널',ll:[37.7647,128.8781],kind:'버스터미널',min:10,al:['시외버스','고속버스','터미널']},
+ {name:'강릉원주대학교',ll:[37.77,128.869],kind:'대학교',min:25,al:['강릉원주대']},
+ {name:'가톨릭관동대학교',ll:[37.738,128.876],kind:'대학교',min:20,al:['관동대']},
+ {name:'교동',ll:[37.764,128.889],kind:'동네',min:10,al:['교동택지']},
+ {name:'포남동',ll:[37.765,128.91],kind:'동네',min:12,al:[]},
+ {name:'홍제동',ll:[37.756,128.88],kind:'동네',min:10,al:[]},
+ {name:'송정동',ll:[37.77,128.931],kind:'동네',min:20,al:[]},
+ {name:'주문진',ll:[37.893,128.827],kind:'동네',min:40,pid:'jumunjin',al:['주문진항']},
+ {name:'강릉 중앙시장',ll:[37.754,128.899],kind:'관광지',min:15,pid:'jungang',al:['중앙시장']},
+ {name:'명주동',ll:[37.753,128.894],kind:'관광지',min:15,pid:'myeongju',al:[]},
+ {name:'안목해변',ll:[37.7722,128.948],kind:'관광지',min:20,pid:'anmok',al:['커피거리']},
+ {name:'경포 해변 숙소',ll:[37.8,128.905],kind:'숙소',min:25,al:['경포','호텔','펜션','숙소']}
+]}
+};
+let REGION,P,ORIGINS,HUB;
+/* 일출·일몰 계산 (천문 공식, 해발 0m 기준, 발표값과 1~2분 오차) */
+function sunTimes(dateStr,ll){const rad=Math.PI/180,dayMs=864e5,J1970=2440588,J2000=2451545,e=rad*23.4397,J0=.0009,lat=ll[0],lng=ll[1];
+ const date=Date.parse(dateStr+'T03:00:00Z');if(isNaN(date))return null;const d=date/dayMs-.5+J1970-J2000,lw=rad*-lng,phi=rad*lat;
+ const n=Math.round(d-J0-lw/(2*Math.PI)),appr=Ht=>J0+(Ht+lw)/(2*Math.PI)+n,ds=appr(0);
+ const M=rad*(357.5291+.98560028*ds),C=rad*(1.9148*Math.sin(M)+.02*Math.sin(2*M)+.0003*Math.sin(3*M)),L=M+C+rad*102.9372+Math.PI;
+ const dec=Math.asin(Math.sin(e)*Math.sin(L)),tr=a=>J2000+a+.0053*Math.sin(M)-.0069*Math.sin(2*L),Jnoon=tr(ds);
+ const w=Math.acos((Math.sin(-.833*rad)-Math.sin(phi)*Math.sin(dec))/(Math.cos(phi)*Math.cos(dec))),Jset=tr(appr(w)),Jrise=Jnoon-(Jset-Jnoon);
+ const km=j=>Math.round(((j+.5-J1970)*dayMs/6e4+540)%1440)-1;return{rise:km(Jrise),set:km(Jset)}}
+const viewSpot=p=>p.tags.some(t=>t==='바다'||t==='호수뷰'||t==='전망');
+const sees=(s,t)=>s.k==='stay'&&viewSpot(s.p)&&s.arr<=t-5&&s.leave>=t;
+const distM=(a,b)=>{const R=6371e3,r=x=>x*Math.PI/180,dl=r(b[0]-a[0]),dn=r(b[1]-a[1]),h=Math.sin(dl/2)**2+Math.cos(r(a[0]))*Math.cos(r(b[0]))*Math.sin(dn/2)**2;return 2*R*Math.asin(Math.sqrt(h))};
+function nearestAll(ll){let best=null;for(const r of Object.values(REG)){const pts=[{name:r.hub.name,ll:r.hub.ll,region:r.id,kind:'hub'},...r.places.map(p=>({name:p.name,ll:p.ll,region:r.id,kind:'place',id:p.id})),...r.origins.map(o=>({name:o.name,ll:o.ll,region:r.id,kind:'origin',o}))];
+ for(const x of pts){const d=distM(ll,x.ll);if(!best||d<best.d)best={...x,d}}}return best}
+const llOfName=n=>{if(n===HUB.name)return HUB.ll;const p=P.find(x=>x.name===n);if(p)return p.ll;const o=ORIGINS.find(x=>x.name===n);return o?o.ll:HUB.ll};
+const mix=(a,b,f)=>[a[0]+(b[0]-a[0])*f,a[1]+(b[1]-a[1])*f];
+function expectedLL(steps,now){for(const s of steps){
+ if(s.k==='stay'&&s.arr<=now&&now<s.leave)return s.p.ll;
+ if(s.k==='bus'&&s.dep<=now&&now<s.arr)return mix(llOfName(s.from),llOfName(s.to),(now-s.dep)/(s.arr-s.dep));
+ if(s.k==='walk'&&s.t<=now&&now<s.t+s.min)return mix(llOfName(s.from),llOfName(s.to),(now-s.t)/s.min);
+ if(s.k==='bus'&&now<s.dep)return llOfName(s.from);
+ if(s.k==='walk'&&now<s.t)return llOfName(s.from);}
+ return llOfName(steps.at(-1).at)}
+function setRegion(id){REGION=REG[id]||REG.cc;P=REGION.places;ORIGINS=REGION.origins;HUB=REGION.hub}
+setRegion('cc');
+const INTRO={"dam": {"d": "1973년에 완공된 국내 최대 규모의 사력댐이에요. 댐 위를 걸으며 넓은 소양호와 산 능선을 한눈에 볼 수 있어요.", "h": ["댐 정상 산책길과 소양호 전망", "물문화관 전시", "댐 아래 막국수 식당"], "tip": "버스가 1시간에 한 대꼴이라 돌아오는 버스 시간을 먼저 확인하고 둘러보세요."}, "mun": {"d": "소설 『봄봄』, 『동백꽃』의 작가 김유정의 고향 실레마을에 있는 문학촌이에요. 생가와 기념전시관이 있고, 소설 속 장소를 잇는 실레이야기길을 걸을 수 있어요.", "h": ["김유정 생가와 기념전시관", "실레이야기길 마을 산책", "경춘선 김유정역과 가까움"], "tip": "마을길을 다 걸으려면 1시간 이상 잡는 게 좋아요."}, "fall": {"d": "봉화산 자락 숲길을 따라 올라가면 만나는 약 50m 높이의 폭포예요. 여름엔 시원한 물줄기, 겨울엔 빙벽으로 유명해요.", "h": ["주차장에서 폭포까지 숲길 산책", "겨울 빙벽", "입구 감자전 가게"], "tip": "배차가 가장 드문 곳이라 놓치면 2시간 넘게 기다릴 수 있어요. 앱의 '꼭 타세요' 표시를 꼭 확인하세요."}, "ani": {"d": "애니메이션의 역사와 제작 과정을 보고 체험할 수 있는 박물관이에요. 실내라 비 오는 날 일정으로 좋아요.", "h": ["애니메이션 역사 전시", "더빙·캐릭터 체험", "아이와 함께 가기 좋음"], "tip": "비 오는 날 '비 와요' 키워드를 누르면 이곳이 대안으로 나와요."}, "cable": {"d": "의암호 위를 가로질러 삼악산으로 올라가는 호수 케이블카예요. 바닥이 투명한 캐빈을 타면 발아래로 호수가 보여요.", "h": ["의암호 공중 횡단", "정상 전망대에서 보는 춘천 시내", "노을 시간대 풍경"], "tip": "해 질 무렵에 타면 노을을 볼 수 있어요. 앱이 일몰 시간에 맞춰 줄 수 있어요."}, "noodle": {"d": "춘천 막국수의 역사와 만드는 과정을 볼 수 있고, 직접 메밀 반죽을 눌러 막국수를 만들어 보는 체험 공간이에요.", "h": ["막국수 만들기 체험", "메밀과 막국수 역사 전시", "직접 만든 막국수 시식"], "tip": "체험은 시간이 정해져 있을 수 있으니 미리 확인하세요."}, "lego": {"d": "의암호의 섬 중도에 2022년 문을 연 레고 테마파크예요. 놀이기구와 레고로 만든 미니랜드가 있어요.", "h": ["놀이기구와 레고 체험", "레고로 만든 한국 명소 미니랜드", "가족·커플 여행지"], "tip": "하루 대부분을 쓰는 곳이라 앱이 4시간 정도 머물도록 잡아요."}, "dak": {"d": "춘천 닭갈비의 대표 골목이에요. 무쇠 철판에 볶는 철판 닭갈비 가게가 모여 있어요.", "h": ["철판 닭갈비와 볶음밥", "명동 거리 쇼핑", "춘천역에서 가까움"], "tip": "점심 시간(11:30~13:30)에 넣으면 앱이 식사 시간으로 맞춰 줘요."}, "market": {"d": "춘천 시내의 전통시장으로 '낭만시장'이라고도 불려요. 시장 먹거리와 지역 특산물을 둘러볼 수 있어요.", "h": ["시장 먹거리", "실내라 날씨와 상관없음", "명동·육림고개와 걸어서 연결"], "tip": "버스를 기다리는 시간을 보내기 좋은 곳이에요."}, "yuk": {"d": "오래된 시장 골목을 청년 가게와 카페가 채운 골목이에요. 레트로 감성 사진 명소로 알려져 있어요.", "h": ["골목 카페와 작은 가게", "레트로 사진 명소", "중앙시장과 이어짐"], "tip": "가게마다 쉬는 날이 달라 평일 낮에는 문 닫은 곳이 있을 수 있어요."}, "gong": {"d": "의암호로 흘러드는 하천을 따라 산책로와 조각공원, 카페거리가 이어진 곳이에요. 에티오피아 한국전쟁 참전기념관도 가까워요.", "h": ["호숫가 산책로", "조각공원", "공지천 카페거리"], "tip": "시내에서 가까워 짧은 여유 시간에 들르기 좋아요."}, "sky": {"d": "소양강 위로 뻗은 바닥이 투명한 유리 전망대예요. 소양강 처녀상과 함께 사진을 많이 찍어요.", "h": ["투명 유리 바닥 전망대", "소양강 처녀상", "강변 노을"], "tip": "30분 정도면 충분히 둘러볼 수 있어요."}, "gyeongpo": {"d": "강릉을 대표하는 해변과 바로 옆 석호 경포호가 함께 있는 곳이에요. 호수 둘레길과 누각 경포대도 가까워요.", "h": ["넓은 백사장과 동해", "경포호 둘레길 산책", "경포대 누각"], "tip": "해변과 호수를 같이 걸으려면 1시간 넘게 잡는 게 좋아요."}, "anmok": {"d": "바다를 바라보는 카페가 줄지어 있는 강릉의 커피거리예요. 강릉 커피 여행의 출발점으로 많이 찾아요.", "h": ["바다 전망 카페", "해변 산책", "강릉항과 가까움"], "tip": "버스가 자주 다녀서 일정 사이에 넣기 쉬워요."}, "ojuk": {"d": "신사임당과 율곡 이이가 태어난 조선시대 집이에요. 이름처럼 줄기가 검은 대나무(오죽)가 자라요.", "h": ["신사임당·율곡 이이 생가", "검은 대나무 오죽", "강릉시립박물관"], "tip": "실외 관람이 많아 비 오는 날에는 박물관 위주로 보세요."}, "seongyo": {"d": "조선 후기 사대부의 큰 한옥 집으로, 연못 위 정자 활래정이 아름다워요. 경포 쪽에서 가까워요.", "h": ["대규모 전통 한옥", "연못 위 정자 활래정", "한옥 사진 명소"], "tip": "오죽헌과 묶어서 '역사' 일정으로 다니기 좋아요."}, "chodang": {"d": "바닷물을 간수로 써서 만드는 초당순두부 식당이 모여 있는 마을이에요. 순두부 젤라또도 유명해요.", "h": ["초당순두부 백반", "순두부 젤라또", "솔밭 산책"], "tip": "점심 시간에 넣으면 앱이 식사로 맞춰 줘요."}, "sori": {"d": "에디슨의 발명품과 세계 여러 나라의 축음기를 모아 둔 박물관이에요. 오래된 축음기로 음악을 들어 볼 수 있어요.", "h": ["축음기·에디슨 발명품 전시", "축음기 음악 감상", "실내 관람"], "tip": "경포 근처라 해변 일정과 묶기 좋아요."}, "jumunjin": {"d": "동해에서 잡은 해산물이 모이는 강릉 북쪽 항구의 수산시장이에요. 회와 건어물을 사거나 먹을 수 있어요.", "h": ["활어회와 해산물", "건어물 시장 구경", "주문진 방파제"], "tip": "강릉 시내에서 버스로 40분쯤 걸려서 오가는 시간을 넉넉히 잡아요."}, "jeongdong": {"d": "바다와 가장 가까운 기차역 중 하나로 알려진 정동진역과 해변이 있는 해돋이 명소예요.", "h": ["해돋이 명소", "바다 앞 기차역", "모래시계 공원"], "tip": "버스가 2시간에 한 대꼴이라 기차로 오가는 것도 함께 생각해 보세요."}, "haslla": {"d": "동해가 내려다보이는 언덕 위 미술관과 조각공원이에요. 실내외 전시와 바다 전망을 함께 즐길 수 있어요.", "h": ["바다 전망 조각공원", "현대미술 전시", "정동진과 가까움"], "tip": "관람에 1시간 30분 이상 걸려요. 정동진과 묶으면 좋아요."}, "jungang": {"d": "강릉 시내 전통시장이에요. 닭강정, 장칼국수 같은 강릉 먹거리를 맛볼 수 있어요.", "h": ["강릉 시장 먹거리", "월화거리와 이어짐", "실내라 날씨와 상관없음"], "tip": "강릉역에서 가까워 마지막 일정이나 귀가 전에 들르기 좋아요."}, "myeongju": {"d": "강릉 옛 도심의 골목으로, 오래된 건물을 고친 카페와 공방이 많아요.", "h": ["옛 도심 골목 산책", "적산가옥을 고친 카페", "작은 공연장·공방"], "tip": "중앙시장, 월화거리와 걸어서 이어져요."}, "wolhwa": {"d": "옛 철길이 있던 자리를 산책길로 만든 거리예요. 중앙시장과 남대천 사이를 걸을 수 있어요.", "h": ["옛 철길 산책로", "남대천 풍경", "중앙시장과 연결"], "tip": "짧게 걷기 좋아 버스를 기다리는 동안 들르기 좋아요."}};
+const REGW=[[/강릉|경포|안목|주문진|정동진|오죽헌|초당|순두부|하슬라|선교장|명주동|월화|참소리|관동대/,'gn'],[/춘천|소양강|닭갈비|공지천|김유정|구곡|삼악산|막국수|육림|남춘천|강원대|한림대|레고랜드/,'cc']];
+const regionOf=s=>{for(const[re,id]of REGW)if(re.test(s))return id;return null};
+const CHO='ㄱㄲㄴㄷㄸㄹㅁㅂㅃㅅㅆㅇㅈㅉㅊㅋㅌㅍㅎ';
+const cho=s=>[...s].map(c=>{const k=c.charCodeAt(0)-44032;return k>=0&&k<11172?CHO[Math.floor(k/588)]:c}).join('');
+function searchOrigins(q){q=(q||'').replace(/\s/g,'');if(!q)return ORIGINS.slice(0,6);const onlyCho=/^[ㄱ-ㅎ]+$/.test(q);
+ return ORIGINS.map(o=>{const keys=[o.name,...o.al].map(x=>x.replace(/\s|·/g,''));let sc=0;
+  keys.forEach(k=>{if(k.startsWith(q))sc=Math.max(sc,3);else if(k.includes(q))sc=Math.max(sc,2);else if(onlyCho&&cho(k).includes(q))sc=Math.max(sc,1)});return{o,sc}})
+  .filter(x=>x.sc).sort((a,b)=>b.sc-a.sc).map(x=>x.o).slice(0,8)}
+const originByName=n=>ORIGINS.find(o=>o.name===n)||ORIGINS[0];
+const byId=id=>id==='hub'?HUB:P.find(p=>p.id===id);
+const CANCEL=new Set();
+const KWALL={'테마':['일출','일몰','테마파크','바다','자연','호수뷰','전망','사진','걷기','등산','문화','체험','실내'],'먹거리':['닭갈비','막국수','순두부','카페','시장 먹거리'],'여행 스타일':['여유롭게','알차게','적게 걷기']};
+function kwFor(){const have=new Set(P.flatMap(p=>p.tags));return Object.fromEntries(Object.entries(KWALL).map(([g,a])=>[g,g==='여행 스타일'?a:a.filter(k=>have.has(k)||k==='일출'||k==='일몰')]))}
+const nb=(p,dir,t)=>p.remote[dir].find(x=>x>=t&&!CANCEL.has(p.id+dir+x));
+function busStep(p,dir,d){const list=p.remote[dir].filter(x=>x>d&&!CANCEL.has(p.id+dir+x));
+ const ps=p.stop||p.name.split('·')[0].replace(/ 커피거리| 수산시장/,'')+' 정류장';
+ return{k:'bus',no:p.remote.no,fromStop:dir==='out'?HUB.stop:ps,toStop:dir==='out'?ps:HUB.stop,p,dir,dep:d,arr:d+p.remote.ride,from:dir==='out'?HUB.name:p.name,to:dir==='out'?p.name:HUB.name,fromHub:dir==='out',gap:list.length?list[0]-d:null,key:p.id+dir+d}}
+let SIMFAIL=null;
+function sim(seq,o){SIMFAIL=null;const AT=o.at||{},ST=o.stays||{},WIN=o.win||{};
+ let t=o.t,loc=o.loc||'hub',wait=0;const steps=[],mult=o.mult||1;
+ const org=o.origin||ORIGINS[0],endOrg=o.endOrigin||org;
+ if(o.start){steps.push({k:'start',t,at:org.name});if(org.min){steps.push({k:'walk',from:org.name,to:HUB.name,t,min:org.min,fromHub:false,origin:true});t+=org.min}}
+ if(o.cur){const p=byId(loc);let leave;
+  if(p.remote){const d=nb(p,'ret',t+5);if(d==null)return null;leave=d-5}else leave=Math.max(t,o.cur.arr);
+  steps.push({k:'stay',p,arr:o.cur.arr,leave,base:o.cur.base,extras:(o.cur.extras||[]).slice()});t=leave}
+ const toHub=()=>{if(loc==='hub')return true;const p=byId(loc);
+  if(p.remote){const d=nb(p,'ret',t+5);if(d==null){SIMFAIL=p.id;return false}steps.push(busStep(p,'ret',d));t=d+p.remote.ride}
+  else{steps.push({k:'walk',from:p.name,to:HUB.name,t,min:p.walk,fromHub:false});t+=p.walk}
+  loc='hub';return true};
+ const free=(until,at,why)=>{if(until-t>=5){steps.push({k:'free',t,min:until-t,at,why});t=until}};
+ for(const id of seq){const p=byId(id),here=loc!=='hub'?byId(loc):null;
+  const want=AT[id];
+  if(here&&!here.remote&&!p.remote){if(want!=null)free(want-10,here.name,p.name);steps.push({k:'walk',from:here.name,to:p.name,t,min:10,fromHub:false});t+=10}
+  else{if(!toHub())return null;
+   if(p.remote){let e=t+5;if(want!=null&&want-p.remote.ride>e){e=want-p.remote.ride}const d=nb(p,'out',e);if(d==null){SIMFAIL=p.id;return null}
+    if(want!=null&&d-5-t>=5)free(d-5,HUB.name,p.name);else wait+=d-t-5;steps.push(busStep(p,'out',d));t=d+p.remote.ride}
+   else{if(want!=null)free(want-p.walk,HUB.name,p.name);steps.push({k:'walk',from:HUB.name,to:p.name,t,min:p.walk,fromHub:true});t+=p.walk}}
+  const base=ST[id]!=null?ST[id]:Math.round(p.stay*mult/5)*5;let leave=t+base;
+  if(p.remote){const d=nb(p,'ret',t+base+5);if(d==null){SIMFAIL=p.id;return null}leave=d-5;wait+=Math.max(0,leave-t-base-30)}
+  steps.push({k:'stay',p,arr:t,leave,base,custom:ST[id]!=null,want,win:WIN[id]?WIN[id].label:null,extras:[]});t=leave;loc=p.id}
+ if(!toHub())return null;
+ if(endOrg.min){steps.push({k:'walk',from:HUB.name,to:endOrg.name,t,min:endOrg.min,fromHub:true,home:true});t+=endOrg.min}
+ steps.push({k:'end',t,at:endOrg.name});
+ return{steps,end:t,wait,ok:t<=o.deadline-10}}
+function fitSim(seq,o){for(let k=seq.length;k>=0;k--){const r=sim(seq.slice(0,k),o);if(r&&r.ok)return Object.assign(r,{dropped:seq.slice(k)})}return null}
+const paceOf=tags=>tags.includes('여유롭게')?{mult:1.25,max:3}:tags.includes('알차게')?{mult:.85,max:5}:{mult:1,max:4};
+const FOODK=['닭갈비','막국수','순두부','시장 먹거리'];
+function scorePlace(p,tags,must){return p.tags.filter(x=>tags.includes(x)).reduce((a,x)=>a+(FOODK.includes(x)?25:10),0)+(must.includes(p.id)?100:0)-(tags.includes('적게 걷기')&&p.tags.some(x=>x==='등산'||x==='걷기')?12:0)+1}
+function makePlans(o){
+ const tags=o.tags||[],must=o.must||[],ex=(o.exclude||[]).concat(o.origin&&o.origin.pid?[o.origin.pid]:[]),pc=paceOf(tags),mult=o.mult||pc.mult,max=pc.max;
+ const c=P.filter(p=>!ex.includes(p.id)).map(p=>({p,s:scorePlace(p,tags,must)})).sort((a,b)=>b.s-a.s).slice(0,7);
+ const out=[];
+ const rec=(seq,used)=>{if(seq.length){const ids=seq.map(x=>x.p.id);
+   const r=sim(ids,{t:o.start,loc:'hub',deadline:o.deadline,mult,start:true,origin:o.origin,endOrigin:o.endOrigin});
+   if(r&&r.ok){const meals=seq.filter(x=>x.p.meal).length,miss=must.filter(m=>!ids.includes(m)).length;
+    const lunch=r.steps.some(s=>s.k==='stay'&&s.p.meal&&s.arr>=690&&s.arr<=810);
+    const sunB=o.sun?((tags.includes('일몰')&&r.steps.some(s=>sees(s,o.sun.set))?40:0)+(tags.includes('일출')&&r.steps.some(s=>sees(s,o.sun.rise))?40:0)):0;
+    const v=sunB+seq.reduce((a,x)=>a+x.s,0)+5*seq.length-.35*r.wait-.03*(o.deadline-r.end)+(lunch?10:0)-Math.max(0,meals-1)*12-miss*200;
+    out.push({ids,r,v,mult})}}
+  if(seq.length>=max)return;
+  c.forEach((x,i)=>{if(!used.has(i)){used.add(i);seq.push(x);rec(seq,used);seq.pop();used.delete(i)}})};
+ rec([],new Set());
+ out.sort((a,b)=>b.v-a.v);
+ const pick=[];for(const x of out){const key=x.ids.slice().sort().join();if(pick.some(y=>y.ids.slice().sort().join()===key))continue;
+  if(pick.length&&pick.every(y=>y.ids.length===x.ids.length&&x.ids.filter(i=>!y.ids.includes(i)).length<1))continue;
+  pick.push(x);if(pick.length===3)break}
+ return pick.map(x=>({v:x.v,seq:x.ids,steps:x.r.steps,end:x.r.end,wait:x.r.wait,mult:x.mult,matched:[...new Set(x.ids.flatMap(i=>byId(i).tags.filter(t=>tags.includes(t))))]}))}
+const DICT=[[/일출|해돋이|해 뜨|해뜨/,'일출'],[/일몰|노을|해넘이|석양|해 지|해지/,'일몰'],[/레고|놀이공원|테마파크|놀이기구/,'테마파크'],[/바다|해변|해수욕|파도/,'바다'],[/순두부/,'순두부'],[/닭갈비/,'닭갈비'],[/막국수/,'막국수'],[/카페|커피/,'카페'],[/시장/,'시장 먹거리'],[/호수|강변|강 /,'호수뷰'],[/등산|산행/,'등산'],[/걷|산책/,'걷기'],[/사진|인생샷/,'사진'],[/전망|뷰|경치/,'전망'],[/실내|비 오|비가|비와|비 와/,'실내'],[/문학|문화|역사/,'문화'],[/체험/,'체험'],[/자연|숲/,'자연'],[/여유|천천히|느긋/,'여유롭게'],[/알차|많이 보|빡빡/,'알차게'],[/덜 걷|힘들|조금만 걷/,'적게 걷기']];
+const placeW=()=>P.filter(p=>p.re).map(p=>[p.re,p.id]);
+function parseText(s){const r={tags:[],must:[]};s=' '+s+' ';
+ DICT.forEach(([re,t])=>{if(re.test(s)&&!r.tags.includes(t))r.tags.push(t)});
+ placeW().forEach(([re,id])=>{if(re.test(s)&&!r.must.includes(id))r.must.push(id)});
+ORIGINS.forEach(o=>[o.name,...o.al].forEach(k=>{const kk=k.replace(/·/g,'');if(!r.origin&&new RegExp(kk+'\\s*(에서|출발|부터)').test(s))r.origin=o}));
+ const re=/(오전|오후|아침|저녁)?\s*(\d{1,2})\s*(?:시|:)\s*(반|\d{1,2}\s*분?)?/g;let m;
+ while((m=re.exec(s))){let h=+m[2],mi=m[3]?(m[3]==='반'?30:parseInt(m[3])):0;
+  if((m[1]==='오후'||m[1]==='저녁')&&h<12)h+=12;else if(!m[1]&&h<8)h+=12;
+  const after=s.slice(re.lastIndex,re.lastIndex+8);const t=h*60+mi;
+  if(/출발|에 나/.test(after))r.start=t;else if(/ITX|KTX|기차|열차|귀가|막차|까지|타|버스/.test(after))r.deadline=t;else if(r.start==null)r.start=t;else r.deadline=t}
+ return r}
+const TRIPW=[[/일몰|노을|해넘이|석양/,'sunset'],[/일출|해돋이/,'sunrise'],[/배고|밥|식사|점심|저녁|먹/,'food'],[/카페|커피|디저트/,'cafe'],[/화장실/,'toilet'],[/비 오|비가|비와|비 와|비온|추워|추운|눈 와|눈이/,'rain'],[/피곤|힘들|다리|지쳐|쉬고/,'tired'],[/시간 남|심심|여유 있|더 갈/,'spare'],[/더 있|더 머물|좋아서|아쉬/,'stay'],[/놓쳤|놓침/,'missed']];
+function intentOf(s){s=' '+s+' ';for(const[re,k]of TRIPW)if(re.test(s))return{k};for(const[re,id]of placeW())if(re.test(s))return{k:'place',id};return null}
+function anchorOf(steps,now){
+ for(let i=0;i<steps.length;i++){const s=steps[i];
+  if(s.k==='end')return{i,hub:true,t:Math.max(now,s.t)};
+  if(s.k==='stay'&&now<s.leave)return{i,stay:s,minLeave:s.leave};
+  if(s.origin&&now<s.t+s.min)return{i:i+1,hub:true,t:s.t+s.min};
+  if(s.k==='bus'||s.k==='walk'){const st=s.k==='bus'?s.dep:s.t,en=s.k==='bus'?s.arr:s.t+s.min;
+   if(now>=en)continue;
+   if(now<st){if(s.fromHub)return{i,hub:true,t:now};const pv=steps[i-1];if(pv&&pv.k==='stay')return{i:i-1,stay:pv,minLeave:pv.leave}}
+   for(let j=i+1;j<steps.length;j++){const q=steps[j];if(q.k==='stay')return{i:j,stay:q,minLeave:q.leave};if(q.k==='end')return{i:j,hub:true,t:q.t}}}}
+ return{i:steps.length-1,hub:true,t:now}}
+const restSeq=(steps,a)=>steps.slice(a.i+1).filter(s=>s.k==='stay').map(s=>s.p.id);
+function replanFrom(steps,a,seq,o){const base=steps.slice(0,a.i);let r;
+ if(a.stay)r=fitSim(seq,{t:(o.minLeave??a.minLeave)+(o.extend||0),loc:a.stay.p.id,cur:{arr:a.stay.arr,base:a.stay.base,extras:a.stay.extras},deadline:o.deadline,mult:o.mult,origin:o.origin,endOrigin:o.endOrigin,stays:o.stays,at:o.at,win:o.win});
+ else r=fitSim(seq,{t:o.t??a.t,loc:'hub',deadline:o.deadline,mult:o.mult,origin:o.origin,endOrigin:o.endOrigin,stays:o.stays,at:o.at,win:o.win});
+ return r?{steps:base.concat(r.steps),dropped:r.dropped,end:r.end}:null}
+</script>
+
+<script>
+{
+/* ===== 카카오맵 설정 =====
+   카카오 디벨로퍼스(developers.kakao.com) > 내 애플리케이션 > 앱 키 > JavaScript 키를 아래 '' 안에 붙여 넣으세요.
+   비워 두면 카카오맵 대신 앱이 직접 그리는 약도가 나와요. */
+const KAKAO_JS_KEY='';
+/* ===== 실시간 버스 정보 (TAGO 중계 서버) =====
+   Cloudflare에 올린 중계 서버 주소를 넣으세요. 예: 'https://ebeon-tago.아이디.workers.dev'
+   공공데이터포털 인증키는 여기에 넣지 말고 중계 서버의 비밀 설정(TAGO_KEY)에만 넣으세요. */
+const API_BASE='';
+let KREADY=false,MAPS=[];
+if(KAKAO_JS_KEY){const go=()=>{try{kakao.maps.load(()=>{KREADY=true;render()})}catch(e){}};
+ if(window.kakao&&window.kakao.maps)go();else{const sc=document.createElement('script');sc.src='https://dapi.kakao.com/v2/maps/sdk.js?autoload=false&appkey='+encodeURIComponent(KAKAO_JS_KEY);sc.onload=go;document.head.appendChild(sc)}}
+function drawK(){if(!KREADY)return;const K=kakao.maps;
+ document.querySelectorAll('.kmap').forEach(el=>{const d=MAPS[+el.dataset.mi];if(!d)return;
+  const L=ll=>new K.LatLng(ll[0],ll[1]),map=new K.Map(el,{center:L(d.nodes[0].ll),level:7}),bd=new K.LatLngBounds(),NS=d.guide&&d.me?d.nodes.concat([{ll:d.me}]):d.nodes;
+  d.segs.forEach(g=>{const a=NS[g.a].ll,b=NS[g.b].ll;new K.Polyline({map,path:[L(a),L(b)],strokeWeight:g.kind==='bus'?5:3,strokeColor:g.cur?'#ff5a3c':g.kind==='bus'?'#0b5d8f':'#566978',strokeOpacity:g.done?.35:.9,strokeStyle:g.kind==='bus'?'solid':'shortdash',endArrow:true})});
+    NS.forEach((x,i)=>{bd.extend(L(x.ll));if(d.guide&&!x.stop)return;new K.CustomOverlay({map,position:L(x.ll),yAnchor:d.guide?1:.5,content:d.guide?`<div class="kstop">${esc(x.name)}</div>`:`<div class="kpin${x.hub?' hub':''}" title="${esc(x.name)}">${i+1}</div>`})});
+  if(d.guide&&!d.me)map.setLevel(3);
+  if(d.me){bd.extend(L(d.me));new K.CustomOverlay({map,position:L(d.me),yAnchor:.5,content:'<div class="kme"></div>'})}
+  if(!(d.guide&&!d.me))map.setBounds(bd,50,50,50,50)})}
+const $=s=>document.querySelector(s),app=$('#app'),dock=$('#dock'),layer=$('#layer');
+const today=new Date().toISOString().slice(0,10);
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+let saved=[];try{saved=JSON.parse(localStorage.getItem('osi-trips')||'[]')}catch(e){}
+const persist=()=>{try{localStorage.setItem('osi-trips',JSON.stringify(saved))}catch(e){}};
+const S={listening:null,micMsg:'',micMsgT:'',screen:'home',fromQ:'',fromOpen:false,form:{days:1,stay:'',morning:'09:00',night:'19:00',origin:ORIGINS[0],date:today,start:'10:00',deadline:'17:00',mode:'기차'},tags:[],text:'',plans:[],tab:0,exclude:[],trip:null,sheet:null,tripText:'',msg:'',loc:{mode:'off'}};
+const stays=st=>st.filter(s=>s.k==='stay');
+const grade=g=>g==null?['b-bad','오늘 마지막 버스']:g<=45?['b-ok','놓쳐도 '+g+'분 뒤 다음 버스']:g<=90?['b-warn','놓치면 '+g+'분 대기']:['b-bad','놓치면 '+g+'분 대기 · 꼭 타세요'];
+function stepHTML(s,now,dl){
+ let cls=s.k,state='';
+ if(now!=null){const en=s.k==='stay'?s.leave:s.k==='bus'?s.arr:s.k==='walk'?s.t+s.min:s.t,st=s.k==='stay'?s.arr:s.k==='bus'?s.dep:s.t;
+  if(en<=now&&s.k!=='end')state=' done';else if(st<=now&&now<en)state=' now'}
+ if(s.k==='start')return`<li class="stay${state}"><span class="t">${hm(s.t)}</span><span class="dot"><i></i></span><span class="c"><b>${s.at} 출발</b></span></li>`;
+ if(s.k==='end')return`<li class="stay${state}"><span class="t">${hm(s.t)}</span><span class="dot"><i></i></span><span class="c"><b>${s.at} 도착</b>${dl==null?'오늘 일정 끝':(dl-s.t>=0?`귀가 기준 ${hm(dl)}까지 ${dl-s.t}분 여유`:`<span class="late">귀가 기준 ${hm(dl)}보다 ${s.t-dl}분 늦어요</span>`)}</span></li>`;
+ if(s.k==='free')return`<li class="walk free${state}"><span class="t" style="font-size:15px;font-weight:600">${hm(s.t)}</span><span class="dot"><i></i></span><span class="c">자유 시간 ${s.min}분 · ${esc(s.at)} 근처 <span class="badge b-ok">${esc(s.why)} 원하는 도착 시각에 맞춰요</span></span></li>`;
+ if(s.k==='walk')return`<li class="walk${state}"><span class="t" style="font-size:15px;font-weight:600">${hm(s.t)}</span><span class="dot"><i></i></span><span class="c">${esc(s.to)}(으)로 이동 · 도보·시내버스 ${s.min}분</span></li>`;
+ if(s.k==='bus'){const[g,l]=grade(s.gap);return`<li class="bus${state}"><span class="t">${hm(s.dep)}</span><span class="dot"><i></i></span><span class="c"><b><span class="rno">${s.no}번</span> 버스 · ${esc(s.to)} 방면</b><span class="stops"><span><i class="on">타는 곳</i>${esc(s.fromStop||s.from)}</span><span><i>내리는 곳</i>${esc(s.toStop||s.to)} · ${hm(s.arr)} 도착 (${s.arr-s.dep}분)</span></span><span class="badge ${g}">${l}</span></span></li>`}
+ const plus=s.leave-s.arr-s.base;
+ return`<li class="stay${state}"><span class="t">${hm(s.arr)}</span><span class="dot"><i></i></span><span class="c"><b><button class="plink" data-act="spot" data-id="${s.p.id}">${esc(s.p.name)}</button></b>${s.leave-s.arr}분 머물기 · ${hm(s.leave)}까지${s.custom?' <span class="badge b-me">직접 정한 시간</span>':''}${s.win?` <span class="badge b-me">${s.win} 희망</span>`:s.want!=null?` <span class="badge b-me">${hm(s.want)} 도착 희망</span>`:''}${plus>0&&s.p.remote?`<br><span class="badge b-ok">버스 시간에 맞춰 +${plus}분 여유</span>`:''}${(()=>{const z=sunNow();return sees(s,z.set)?`<br><span class="badge b-sun">일몰 ${hm(z.set)} · 노을 보기 좋은 곳</span>`:sees(s,z.rise)?`<br><span class="badge b-sun">일출 ${hm(z.rise)} · 해돋이 보기 좋은 곳</span>`:''})()}${introHTML(s.p)}${s.extras.map(x=>`<span class="extra">+ ${esc(x.name)} ${x.mins}분</span>`).join('')}${S.screen==='pre3'&&S.edit?edCtl(s):S.screen==='pre3'?`<br><button class="mini" data-act="drop" data-id="${s.p.id}">이 장소 빼고 다시 짜기</button>`:''}</span></li>`}
+function routeMap(steps,o={}){const extra={};[S.form.origin,S.trip&&S.trip.origin,S.trip&&S.trip.endOrigin,...(S.multi||[]).flatMap(d=>[d.origin,d.endOrigin])].forEach(x=>{if(x&&x.ll)extra[x.name]=x.ll});
+ const LL=n=>extra[n]||llOfName(n),nodes=[],segs=[],idx=n=>{let k=nodes.findIndex(x=>x.name===n);if(k<0){nodes.push({name:n,ll:LL(n),hub:n===HUB.name});k=nodes.length-1}return k};
+ for(const st of steps){if(st.k==='start'||st.k==='end')idx(st.at);else if(st.k==='stay')idx(st.p.name);
+  else if(st.k==='bus'||st.k==='walk'){const a=idx(st.from),b=idx(st.to),t0=st.k==='bus'?st.dep:st.t,t1=st.k==='bus'?st.arr:st.t+st.min;segs.push({a,b,kind:st.k,no:st.no,t0,t1})}}
+ if(KREADY){const now=o.now,mi=MAPS.length;MAPS.push({nodes,me:o.me,segs:segs.map(g=>{const done=now!=null&&g.t1<=now;return{...g,done,cur:now!=null&&!done&&(g.t0<=now||segs.filter(q=>q.t1>now)[0]===g)}})});
+  return`<figure class="rmap"><div class="kmap" data-mi="${mi}" role="img" aria-label="카카오맵 이동 경로"></div><figcaption><ol class="mleg">${nodes.map((x,i)=>`<li><b>${i+1}</b>${esc(x.name)}</li>`).join('')}</ol><span>카카오맵 · 진한 선은 버스, 점선은 도보·시내 이동이에요.${now!=null?' 주황색 선은 지금 또는 다음 이동, 주황 점은 내 위치예요.':''} 선은 정류장 사이를 곧게 이은 것이에요.</span></figcaption></figure>`}
+ const pts=nodes.map(x=>x.ll).concat(o.me?[o.me]:[]),mlat=pts.reduce((a,x)=>a+x[0],0)/pts.length,kx=Math.cos(mlat*Math.PI/180);
+ const X=pts.map(x=>x[1]*kx),Y=pts.map(x=>x[0]),W=360,H=o.h||230,pad=26,minx=Math.min(...X),maxx=Math.max(...X),miny=Math.min(...Y),maxy=Math.max(...Y);
+ const sc=Math.min((W-2*pad)/Math.max(maxx-minx,.004),(H-2*pad)/Math.max(maxy-miny,.004)),cx=(minx+maxx)/2,cy=(miny+maxy)/2;
+ const P2=ll=>[W/2+(ll[1]*kx-cx)*sc,H/2-(ll[0]-cy)*sc],now=o.now,uid='m'+Math.random().toString(36).slice(2,7);
+ const kmPx=sc/111,bar=[.5,1,2,5,10,20].find(k=>k*kmPx>=40)||20;
+ const seen={};let lines='';
+ for(const g of segs){const A=P2(nodes[g.a].ll),B=P2(nodes[g.b].ll),dx=B[0]-A[0],dy=B[1]-A[1],L=Math.hypot(dx,dy)||1,ux=dx/L,uy=dy/L,key=[g.a,g.b].sort().join('-');
+  const off=(seen[key]=(seen[key]||0)+1)>1?6:0,nx=-uy*off,ny=ux*off,r=11;if(L<2*r+2)continue;
+  const x1=A[0]+ux*r+nx,y1=A[1]+uy*r+ny,x2=B[0]-ux*r+nx,y2=B[1]-uy*r+ny;
+  const done=now!=null&&g.t1<=now,cur=now!=null&&!done&&(g.t0<=now||segs.filter(q=>q.t1>now)[0]===g);
+  const col=cur?'var(--coral)':g.kind==='bus'?'var(--lake)':'var(--mute)';
+  lines+=`<line x1="${x1.toFixed(1)}" y1="${y1.toFixed(1)}" x2="${x2.toFixed(1)}" y2="${y2.toFixed(1)}" stroke="${col}" stroke-width="${g.kind==='bus'?3:2}" ${g.kind==='walk'?'stroke-dasharray="4 4"':''} opacity="${done?.3:1}" marker-end="url(#${uid}${cur?'c':g.kind==='bus'?'b':'w'})"/>`;
+  if(g.kind==='bus'&&L>70){const mx=(x1+x2)/2+nx*1.6,my=(y1+y2)/2+ny*1.6;lines+=`<g opacity="${done?.35:1}"><rect x="${(mx-15).toFixed(1)}" y="${(my-8).toFixed(1)}" width="30" height="16" rx="5" fill="${col}"/><text x="${mx.toFixed(1)}" y="${(my+4).toFixed(1)}" text-anchor="middle" font-size="10.5" font-weight="700" fill="#fff">${esc(g.no)}</text></g>`}}
+ const dots=nodes.map((x,i)=>{const[px,py]=P2(x.ll);return x.hub?`<rect x="${(px-10).toFixed(1)}" y="${(py-10).toFixed(1)}" width="20" height="20" rx="5" fill="var(--lake)"/><text x="${px.toFixed(1)}" y="${(py+4).toFixed(1)}" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">${i+1}</text>`:`<circle cx="${px.toFixed(1)}" cy="${py.toFixed(1)}" r="10" fill="var(--paper)" stroke="var(--lake)" stroke-width="2.5"/><text x="${px.toFixed(1)}" y="${(py+4).toFixed(1)}" text-anchor="middle" font-size="11" font-weight="700" fill="var(--ink)">${i+1}</text>`}).join('');
+ const me=o.me?(()=>{const[px,py]=P2(o.me);return`<circle cx="${px.toFixed(1)}" cy="${py.toFixed(1)}" r="13" fill="var(--coral)" opacity=".18"/><circle cx="${px.toFixed(1)}" cy="${py.toFixed(1)}" r="6" fill="var(--coral)" stroke="#fff" stroke-width="2"/>`})():'';
+ const mk=(id,c)=>`<marker id="${uid}${id}" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0 0L10 5L0 10z" fill="${c}"/></marker>`;
+ return`<figure class="rmap"><svg viewBox="0 0 ${W} ${H}" role="img" aria-label="이동 경로 약도"><defs>${mk('b','var(--lake)')}${mk('w','var(--mute)')}${mk('c','var(--coral)')}</defs>
+  <rect width="${W}" height="${H}" rx="14" fill="var(--lake2)"/>
+  <g stroke="var(--line)" stroke-width="1">${[1,2,3].map(i=>`<line x1="${W*i/4}" y1="0" x2="${W*i/4}" y2="${H}"/><line x1="0" y1="${H*i/4}" x2="${W}" y2="${H*i/4}"/>`).join('')}</g>
+  ${lines}${dots}${me}
+  <g transform="translate(${W-22},22)"><path d="M0 -12L5 2L0 -1L-5 2z" fill="var(--ink)"/><text y="14" text-anchor="middle" font-size="10" fill="var(--mute)">N</text></g>
+  <g transform="translate(14,${H-14})"><line x1="0" y1="0" x2="${(bar*kmPx).toFixed(1)}" y2="0" stroke="var(--ink)" stroke-width="2"/><text x="0" y="-5" font-size="10" fill="var(--mute)">${bar}km</text></g></svg>
+  <figcaption><ol class="mleg">${nodes.map((x,i)=>`<li><b>${i+1}</b>${esc(x.name)}</li>`).join('')}</ol><span>약도 · 실제 거리 비율로 그렸고, 도로를 따른 실제 경로는 아니에요. 진한 선은 버스, 점선은 도보·시내 이동${now!=null?', 주황색은 지금 또는 다음 이동':''}이에요.</span></figcaption></figure>`}
+const tl=(steps,now,dl)=>`<ol class="tl">${steps.map(s=>stepHTML(s,now,dl)).join('')}</ol>`;
+const illoPre=`<svg viewBox="0 0 96 80" aria-hidden="true"><rect x="8" y="10" width="62" height="60" rx="10" fill="var(--lake2)" stroke="var(--lake)" stroke-width="2"/><rect x="8" y="10" width="62" height="16" rx="8" fill="var(--lake)"/><g fill="var(--lake)">${[0,1,2].map(r=>[0,1,2].map(c=>`<rect x="${16+c*17}" y="${34+r*11}" width="11" height="6" rx="2" opacity="${r===1&&c===1?1:.35}"/>`).join('')).join('')}</g><circle cx="74" cy="56" r="16" fill="var(--coral)"/><path d="M66 56l6 6l10-12" stroke="#fff" stroke-width="3.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+const illoDur=`<svg viewBox="0 0 96 80" aria-hidden="true"><path d="M0 60L22 34L36 46L56 22L80 50L96 40V80H0z" fill="var(--lake2)"/><rect x="14" y="40" width="58" height="26" rx="7" fill="var(--lake)"/><rect x="20" y="45" width="12" height="9" rx="2" fill="#fff" opacity=".85"/><rect x="36" y="45" width="12" height="9" rx="2" fill="#fff" opacity=".85"/><rect x="52" y="45" width="14" height="9" rx="2" fill="#fff" opacity=".85"/><circle cx="26" cy="67" r="5" fill="var(--ink)"/><circle cx="60" cy="67" r="5" fill="var(--ink)"/><circle cx="76" cy="20" r="14" fill="var(--paper)" stroke="var(--coral)" stroke-width="3"/><path d="M76 12v8l6 4" stroke="var(--coral)" stroke-width="3" fill="none" stroke-linecap="round"/></svg>`;
+function openTrip(t,di){setRegion(t.region||'cc');
+ if(t.multi){if(di==null){di=t.days.findIndex(d=>d.date===today);if(di<0)di=0}const d=t.days[di],o=originByName(d.origin),e=originByName(d.endOrigin);
+  const r=sim(d.seq,{t:tm(d.start),loc:'hub',deadline:tm(d.end),mult:d.mult,start:true,origin:o,endOrigin:e,stays:d.stays,at:d.at,win:d.win});
+  startTrip(d.seq,r?r.steps:[],{stays:d.stays,at:d.at,win:d.win,date:d.date,deadline:tm(d.end),mult:d.mult,tags:t.tags,title:t.title,origin:o,endOrigin:e});S.trip.saved=t;S.trip.autoEnd=!!d.autoEnd;S.trip.day=di;return}
+ startTrip(t.seq,loadSaved(t),{stays:t.stays,at:t.at,win:t.win,date:t.date,deadline:tm(t.deadline),mult:t.mult,tags:t.tags,title:t.title,origin:originByName(t.origin)})}
+function loadSaved(t){setRegion(t.region||'cc');const r=sim(t.seq,{stays:t.stays,at:t.at,win:t.win,t:tm(t.start),loc:'hub',deadline:tm(t.deadline),mult:t.mult,start:true,origin:originByName(t.origin)});return r?r.steps:[]}
+const originList=()=>{const r=searchOrigins(S.fromQ);return r.length?r.map(o=>`<button type="button" class="opt${o.name===S.form.origin.name?' on':''}" data-act="pickOrigin" data-n="${esc(o.name)}" role="option"><b>${esc(o.name)}</b><small>${o.kind}${o.min?` · 환승 지점(${HUB.name})까지 ${o.min}분`:' · 버스 환승 지점'}</small></button>`).join(''):`<p class="hint" style="padding:10px 12px">'${esc(S.fromQ)}'에 맞는 곳이 없어요. 가까운 역이나 동네 이름으로 찾아보세요.</p>`};
+const originPicker=label=>`<div class="f"><span class="fl">${label}</span><button type="button" class="btn ghost locbtn" data-act="locFind"><span class="pin"></span>${S.loc.mode==='asking'&&S.loc.pendingQuick?'내 위치를 확인하는 중…':'내 위치로 출발지 찾기'}</button>${S.locMsg?`<p class="hint locmsg">${esc(S.locMsg)}</p>`:''}<div class="picked"><b>${esc(S.form.origin.name)}</b><small>${S.form.origin.kind}${S.form.origin.min?` · ${HUB.name}까지 ${S.form.origin.min}분`:''}</small></div>
+ <input id="fromQ" class="search" type="search" value="${esc(S.fromQ)}" placeholder="역, 터미널, 동네, 숙소 검색 (초성 가능: ㄴㅊㅊ)" autocomplete="off" role="combobox" aria-expanded="${S.fromOpen||S.fromQ?'true':'false'}" aria-controls="fromList">
+ <div id="fromList" class="opts" role="listbox"${S.fromOpen||S.fromQ?'':' hidden'}>${S.fromOpen||S.fromQ?originList():''}</div></div>`;
+const addDays=(d,n)=>{const x=new Date(d+'T00:00:00Z');x.setUTCDate(x.getUTCDate()+n);return x.toISOString().slice(0,10)};
+const md=d=>`${+d.slice(5,7)}/${+d.slice(8)}`;
+const DUR=['당일','1박 2일','2박 3일'];
+const stayOf=()=>{const o=ORIGINS.find(x=>x.name===S.form.stay);return o||ORIGINS.find(x=>x.kind==='숙소')||ORIGINS[0]};
+const sunNow=()=>sunTimes(S.viewDate||(S.trip&&S.screen==='trip'?S.trip.date:S.form.date),HUB.ll)||{rise:0,set:0};
+const sunLine=()=>{const z=sunNow();return`<p class="sunl"><span class="sr"></span>${REGION.name} 일출 <b>${hm(z.rise)}</b><span class="ss"></span>일몰 <b>${hm(z.set)}</b></p>`};
+const fmtD=d=>d<1000?Math.round(d/10)*10+'m':(d/1000).toFixed(1)+'km';
+function locNow(){const L=S.loc,T=S.trip;if(L.mode==='real')return{ll:L.ll,src:`GPS · 오차 ±${L.acc}m`};
+ if(L.mode==='demo'&&T){const e=expectedLL(T.steps,T.now);return{ll:L.far?[e[0]+.0072,e[1]]:e,src:'시연 위치'}}return null}
+function locHTML(){const L=S.loc,T=S.trip;if(!T||L.mode==='off')return'';
+ if(L.mode==='later')return`<div class="loc"><span class="pin"></span><div><b>위치가 꺼져 있어요</b><p>켜면 정류장까지 걷는 시간을 계산해 알려 드려요.</p></div><button class="mini" data-act="locAllow">위치 켜기</button></div>`;
+ if(L.mode==='asking')return`<div class="loc"><span class="pin"></span><div><b>내 위치를 확인하는 중…</b></div></div>`;
+ const me=locNow(),nr=nearestAll(me.ll),now=T.now;
+ const here=nr.d<300?`${esc(nr.name)} 근처`:`${esc(nr.name)}에서 ${fmtD(nr.d)}`;
+ const onBus=T.steps.find(s=>s.k==='bus'&&s.dep<=now&&now<s.arr),nx=T.steps.find(s=>s.k==='bus'&&s.dep>=now),nm=T.steps.find(s=>(s.k==='walk'&&s.t>=now)||(s.k==='bus'&&s.dep>=now));
+ let line='',warn='';
+ if(onBus)line=`버스 안 · ${esc(onBus.to)}까지 약 ${onBus.arr-now}분`;
+ else if(nm&&nm.k==='walk')line=`다음 이동 <b>${hm(nm.t)}</b> · ${esc(nm.to)}(으)로 도보·시내버스 ${nm.min}분`;
+ else if(nx){const dS=distM(me.ll,llOfName(nx.from)),wm=Math.ceil(dS/67),go=nx.dep-wm-3;
+  if(dS<120)line=`${esc(nx.from)} 정류장 바로 앞이에요 · ${hm(nx.dep)} ${nx.no}번 버스`;
+  else{line=`${esc(nx.from)} 정류장까지 ${fmtD(dS)} · 걸어서 약 ${wm}분 → <b>${hm(Math.max(go,now))}</b>에 출발하세요`;
+   if(now>nx.dep-wm)warn=`<div class="lwarn bad">지금 걸어가면 ${hm(nx.dep)} ${nx.no}번 버스를 놓쳐요<button class="mini" data-act="missed">다음 버스로 다시 짜기</button></div>`;
+   else if(go-now<=10)warn=`<div class="lwarn">지금 정류장으로 출발하세요 · ${Math.max(go-now,0)}분 남음</div>`}}
+ const other=nr.region!==REGION.id?`<p>지금 위치는 ${REG[nr.region].name} 지역이에요.</p>`:'';
+ const demo=L.mode==='demo'?`<p class="note">이 미리보기 화면은 브라우저가 위치 권한을 막아 두어서, 일정상 있어야 할 곳을 시연 위치로 보여 드려요. 실제 앱에서는 휴대폰 GPS를 써요. <button class="mini" data-act="locAllow">다시 시도</button></p>`:'';
+ return`<div class="loc"><span class="pin"></span><div><b>${here}</b><small>${me.src}</small><p>${line}</p>${other}${demo}</div></div>${warn}`}
+const brg=(a,b)=>{const r=x=>x*Math.PI/180,y=Math.sin(r(b[1]-a[1]))*Math.cos(r(b[0])),x=Math.cos(r(a[0]))*Math.sin(r(b[0]))-Math.sin(r(a[0]))*Math.cos(r(b[0]))*Math.cos(r(b[1]-a[1]));return(Math.atan2(y,x)*180/Math.PI+360)%360};
+const dirName=d=>['북','북동','동','남동','남','남서','서','북서'][Math.round(d/45)%8];
+function guideMap(me,tg,label){
+ if(KREADY){const mi=MAPS.length;MAPS.push({guide:true,nodes:[{name:label,ll:tg,stop:true}],segs:me?[{a:1,b:0,kind:'walk',cur:true}]:[],me,meNode:me});return`<div class="kmap g" data-mi="${mi}" role="img" aria-label="${esc(label)} 위치 지도"></div>`}
+ const W=360,H=180,pts=me?[me,tg]:[tg],ml=(pts[0][0]+pts.at(-1)[0])/2,kx=Math.cos(ml*Math.PI/180);
+ const X=pts.map(x=>x[1]*kx),Y=pts.map(x=>x[0]),sp=Math.max(Math.max(...X)-Math.min(...X),Math.max(...Y)-Math.min(...Y),.004),sc=Math.min(W-90,H-70)/sp,cx=(Math.max(...X)+Math.min(...X))/2,cy=(Math.max(...Y)+Math.min(...Y))/2;
+ const P2=ll=>[W/2+(ll[1]*kx-cx)*sc,H/2-(ll[0]-cy)*sc],[tx,ty]=P2(tg),kmPx=sc/111,bar=[.1,.2,.5,1,2,5].find(k=>k*kmPx>=40)||5,uid='g'+Math.random().toString(36).slice(2,6);
+ let line='',meDot='';if(me){const[mx,my]=P2(me),L=Math.hypot(tx-mx,ty-my)||1,ux=(tx-mx)/L,uy=(ty-my)/L;
+  if(L>30)line=`<line x1="${(mx+ux*12).toFixed(1)}" y1="${(my+uy*12).toFixed(1)}" x2="${(tx-ux*16).toFixed(1)}" y2="${(ty-uy*16).toFixed(1)}" stroke="var(--coral)" stroke-width="4" stroke-dasharray="2 7" stroke-linecap="round" marker-end="url(#${uid})"/>`;
+  meDot=`<circle cx="${mx.toFixed(1)}" cy="${my.toFixed(1)}" r="16" fill="var(--coral)" opacity=".18"/><circle cx="${mx.toFixed(1)}" cy="${my.toFixed(1)}" r="7" fill="var(--coral)" stroke="#fff" stroke-width="2.5"/><text x="${mx.toFixed(1)}" y="${(my+28).toFixed(1)}" text-anchor="middle" font-size="11" fill="var(--ink)" font-weight="600">내 위치</text>`}
+ return`<svg class="gsvg" viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(label)}까지 약도"><defs><marker id="${uid}" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="4" markerHeight="4" orient="auto"><path d="M0 0L10 5L0 10z" fill="var(--coral)"/></marker></defs>
+  <rect width="${W}" height="${H}" rx="14" fill="var(--lake2)"/><g stroke="var(--line)">${[1,2,3].map(i=>`<line x1="${W*i/4}" y1="0" x2="${W*i/4}" y2="${H}"/><line x1="0" y1="${H*i/3}" x2="${W}" y2="${H*i/3}"/>`).join('')}</g>
+  ${line}<g transform="translate(${tx.toFixed(1)},${ty.toFixed(1)})"><path d="M0 0C-9 -12 -12 -16 -12 -22a12 12 0 0 1 24 0c0 6 -3 10 -12 22z" fill="var(--lake)"/><circle cy="-22" r="5" fill="#fff"/></g>
+  <text x="${tx.toFixed(1)}" y="${(ty+16).toFixed(1)}" text-anchor="middle" font-size="12" font-weight="700" fill="var(--ink)">${esc(label)}</text>${meDot}
+  <g transform="translate(${W-20},20)"><path d="M0 -11L5 2L0 -1L-5 2z" fill="var(--ink)"/><text y="13" text-anchor="middle" font-size="10" fill="var(--mute)">N</text></g>
+  <g transform="translate(14,${H-12})"><line x2="${(bar*kmPx).toFixed(1)}" stroke="var(--ink)" stroke-width="2"/><text y="-5" font-size="10" fill="var(--mute)">${bar<1?bar*1000+'m':bar+'km'}</text></g></svg>`}
+/* 실시간 도착 정보: 정류장 좌표 → 가까운 실제 정류소(TAGO) → 도착 예정 버스 */
+const LIVE={stops:{},arr:{},busy:{}};
+const tItems=j=>{const it=j&&j.response&&j.response.body&&j.response.body.items;if(!it)return[];const x=it.item;return!x?[]:Array.isArray(x)?x:[x]};
+const tago=(svc,op,q)=>fetch(`${API_BASE.replace(/\/$/,'')}/tago/${svc}/${op}?${new URLSearchParams(q)}`).then(r=>{if(!r.ok)throw new Error(r.status);return r.json()}).then(j=>{const c=j&&j.response&&j.response.header&&j.response.header.resultCode;if(c&&c!=='00')throw new Error(j.response.header.resultMsg||c);return j});
+function liveFor(ll){if(!API_BASE)return null;const k=ll.map(x=>x.toFixed(4)).join(',');const a=LIVE.arr[k];
+ if(!LIVE.busy[k]&&(!a||Date.now()-a.at>30000)){LIVE.busy[k]=1;
+  const st=LIVE.stops[k]?Promise.resolve(LIVE.stops[k]):tago('BusSttnInfoInqireService','getCrdntPrxmtSttnList',{gpsLati:ll[0],gpsLong:ll[1],numOfRows:10}).then(j=>{const ss=tItems(j).map(x=>({...x,d:distM(ll,[+x.gpslati,+x.gpslong])})).sort((a,b)=>a.d-b.d);LIVE.stops[k]=ss[0]||null;return LIVE.stops[k]});
+  st.then(stop=>{if(!stop)throw new Error('주변 정류소 없음');return tago('ArvlInfoInqireService','getSttnAcctoArvlPrearngeInfoList',{cityCode:stop.citycode,nodeId:stop.nodeid,numOfRows:20}).then(j=>({stop,list:tItems(j).sort((a,b)=>+a.arrtime-+b.arrtime)}))})
+   .then(r=>{LIVE.arr[k]={at:Date.now(),...r}}).catch(e=>{LIVE.arr[k]={at:Date.now(),err:String(e.message||e)}}).finally(()=>{LIVE.busy[k]=0;const b=document.getElementById('livebox');if(b&&b.dataset.k===k)b.innerHTML=liveInner(k)})}
+ return k}
+function liveInner(k){const a=LIVE.arr[k];if(!a)return'<p class="lvwait">실시간 도착 정보를 불러오는 중…</p>';
+ if(a.err)return`<p class="lverr">실시간 정보를 받지 못했어요 (${esc(a.err)}). 예시 시간표로 안내하고 있어요.</p>`;
+ const sec=Math.round((Date.now()-a.at)/1000);
+ return`<p class="lvh"><span class="lvdot"></span>실시간 · ${esc(a.stop.nodenm)}${a.stop.d>150?` (${fmtD(a.stop.d)} 떨어진 가장 가까운 정류소)`:''}</p>${a.list.length?`<ul class="lvl">${a.list.slice(0,4).map(x=>`<li><span class="rno">${esc(x.routeno)}번</span><b>${Math.max(0,Math.round((+x.arrtime-sec)/60))}분 뒤</b><span>${x.arrprevstationcnt!=null?`${esc(x.arrprevstationcnt)}정거장 전`:''}</span></li>`).join('')}</ul>`:'<p class="lvwait">지금 이 정류소로 오는 버스 정보가 없어요.</p>'}`}
+function liveHTML(ll){const k=liveFor(ll);if(!k)return'';return`<div class="live" id="livebox" data-k="${k}">${liveInner(k)}</div>`}
+function guideHTML(){const T=S.trip;if(!T)return'';const now=T.now,st=T.steps;
+ const onBus=st.find(s=>s.k==='bus'&&s.dep<=now&&now<s.arr);
+ if(onBus)return`<div class="guide"><div class="gh"><span class="gk">지금 할 일</span><b>${esc(onBus.toStop||onBus.to)}에서 내리세요</b><p>${onBus.no}번 버스 안 · ${hm(onBus.arr)} 도착 예정 (약 ${onBus.arr-now}분)</p></div>${guideMap((locNow()||{}).ll,llOfName(onBus.to),onBus.toStop||onBus.to)}</div>`;
+ const nm=st.find(s=>(s.k==='bus'&&s.dep>=now)||(s.k==='walk'&&s.t+s.min>now));if(!nm)return'';
+ const isBus=nm.k==='bus',tg=llOfName(isBus?nm.from:nm.to),label=isBus?(nm.fromStop||nm.from):nm.to,me=(locNow()||{}).ll;
+ let how='';
+ if(me){const d=distM(me,tg),wm=Math.max(1,Math.ceil(d/67)),b=brg(me,tg);
+  how=d<60?(isBus?`<p class="gnow">정류장에 도착했어요 · ${nm.no}번 버스 ${hm(nm.dep)} 승차</p>`:`<p class="gnow">도착했어요</p>`)
+   :`<div class="gdir"><span class="garr" style="transform:rotate(${Math.round(b)}deg)" aria-hidden="true">↑</span><div><b>${dirName(b)}쪽으로 ${fmtD(d)}</b><p>걸어서 약 ${wm}분${isBus?` · ${hm(nm.dep-wm-3)}까지 출발하세요`:''}</p></div></div>`}
+ else how=`<p class="gnote">위치를 켜면 여기서 정류장까지 방향과 거리를 바로 알려 드려요. <button class="mini" data-act="locAllow">위치 켜기</button></p>`;
+ return`<div class="guide"><div class="gh"><span class="gk">지금 할 일</span><b>${isBus?`${nm.no}번 버스 타러 ${esc(label)}`:`${esc(label)}(으)로 이동`}</b><p>${isBus?`${hm(nm.dep)} 출발 · ${esc(nm.to)} 방면`:`도보·시내버스 약 ${nm.min}분`}</p></div>${how}${isBus?liveHTML(tg):''}${guideMap(me,tg,label)}<p class="gfoot">지도 위쪽이 북쪽이에요.${KREADY?'':' 카카오 키를 넣으면 이 자리에 실제 지도가 나와요.'}</p></div>`}
+function locAllow(){S.loc={mode:'asking',pendingQuick:S.loc.pendingQuick};updLoc();
+ const fail=()=>{if(S.loc.mode==='real')return;const q=S.loc.pendingQuick;S.loc={mode:'demo',far:false};if(q){S.locMsg='위치를 받을 수 없어요. 아래에서 출발지를 검색해 주세요. (이 미리보기 화면은 브라우저가 위치 권한을 막아 두었어요. 실제 앱에서는 휴대폰 GPS로 찾아요.)';render()}else updLoc()};
+ if(!navigator.geolocation)return fail();
+ try{navigator.geolocation.watchPosition(pos=>{const q=S.loc.pendingQuick;S.loc={mode:'real',ll:[pos.coords.latitude,pos.coords.longitude],acc:Math.round(pos.coords.accuracy)};if(q)applyQuickLoc();else updLoc()},fail,{enableHighAccuracy:true,maximumAge:15000,timeout:10000})}catch(e){fail()}
+ setTimeout(()=>{if(S.loc.mode==='asking')fail()},12000)}
+function applyQuickLoc(){S.loc.pendingQuick=false;const nr=nearestAll(S.loc.ll);
+ if(nr.d>15000){S.locMsg=`지금 위치가 춘천·강릉에서 ${fmtD(nr.d)} 떨어져 있어요. 지역과 출발지를 직접 골라 주세요.`;render();return}
+ setRegion(nr.region);S.form.origin=nr.kind==='origin'?nr.o:nr.kind==='hub'?ORIGINS[0]:{name:`현재 위치 (${nr.name} 근처)`,ll:S.loc.ll,kind:'현재 위치',min:Math.max(5,Math.round(distM(S.loc.ll,HUB.ll)/300)),pid:nr.id,al:[]};
+ S.locMsg=`현재 위치로 찾았어요 · 지역 ${REGION.name} · 가장 가까운 곳 ${nr.name} (${fmtD(nr.d)})`;S.fromQ='';S.fromOpen=false;S.exclude=[];render()}
+function updLoc(){const g=document.getElementById('guidebox');if(g){g.innerHTML=guideHTML();drawK()}const b=document.getElementById('locbox');if(b){b.innerHTML=locHTML();const pm=document.getElementById('perm');if(pm&&S.loc.mode!=='off')pm.remove()}}
+function sunAlert(p,dl=tm(S.form.deadline),field='deadline',day=null){const z=sunNow(),tags0=S.allTags||[],out=[];let tags=tags0;
+ if(day&&day.i>0&&tags.includes('일출')){const st=day.origin;let b=null;P.filter(x=>viewSpot(x)).forEach(x=>{const d=distM(st.ll,x.ll);if(!b||d<b.d)b={x,d}});
+  if(b&&b.d<2500){const w=Math.ceil(b.d/67);out.push(`<div class="sunok">일출 ${hm(z.rise)} · 숙소(${esc(st.name)})에서 ${esc(b.x.name)}까지 걸어서 약 ${w}분이에요. ${hm(z.rise-w-10)}에 나가면 해돋이를 볼 수 있어요.</div>`)}
+  else out.push(`<div class="alert">숙소에서 바다가 멀어서 걸어서 일출을 보기 어려워요. 숙소를 바닷가(${esc((ORIGINS.find(x=>x.kind==='숙소')||{}).name||'해변 근처')})로 잡으면 걸어서 볼 수 있어요.</div>`)}
+ if(day&&day.n>1){tags=tags.filter(t=>t!=='일출')}
+ if(tags.includes('일몰')&&!p.steps.some(s=>sees(s,z.set))){
+  if(dl<z.set+40){const nd=Math.ceil((z.set+60)/30)*30;out.push(`<div class="alert">일몰(${hm(z.set)})을 보려면 귀가 시각이 그 뒤여야 해요.<button class="mini w" data-act="setDeadline" data-f="${field}" data-t="${hm(nd)}">귀가 시각 ${hm(nd)} 기준으로 다시 짜기</button></div>`)}
+  else out.push(`<div class="alert">이 안에는 일몰 시간에 머무는 바다·호수·전망 장소가 없어요. 다른 안을 보거나 '바다' 키워드를 더해 보세요.</div>`)}
+ if(tags.includes('일출')&&!p.steps.some(s=>sees(s,z.rise))){
+  const org=S.form.origin||ORIGINS[0];let best=null;
+  P.filter(x=>viewSpot(x)).forEach(x=>{const a=x.remote?x.remote.out[0]+x.remote.ride+org.min:x.walk+org.min+tm('05:30');if(!best||a<best.a)best={x,a}});
+  if(best&&best.a>z.rise-10)out.push(`<div class="alert">일출(${hm(z.rise)}) 전에 닿는 버스가 없어요. 가장 빨라도 ${esc(best.x.name)} ${hm(best.a)} 도착이에요. 해돋이는 해변 근처 숙소에서 걸어가거나 택시를 이용해 주세요.${REGION.id==='gn'?' 정동진은 기차로도 갈 수 있어요.':''}</div>`);
+  else if(best){const ns=Math.floor((best.a-(best.x.remote?best.x.remote.ride:best.x.walk)-org.min-10)/10)*10;out.push(`<div class="alert">일출(${hm(z.rise)})을 보려면 일찍 출발해야 해요.<button class="mini w" data-act="setStart" data-t="${hm(Math.max(ns,300))}">출발 ${hm(Math.max(ns,300))} 기준으로 다시 짜기</button></div>`)}}
+ return out.join('')}
+function pre3multi(){const d=S.multi[S.tab],p=d.plan;S.viewDate=d.date;
+ const html=`<h1>${DUR[S.multi.length-1]} 일정이에요</h1>
+  <div class="tabs" role="tablist">${S.multi.map((x,i)=>`<button role="tab" class="${i===S.tab?'on':''}" data-act="tab" data-i="${i}" aria-selected="${i===S.tab}">${i+1}일차 · ${md(x.date)}</button>`).join('')}</div>
+  ${sunLine()}${sunAlert(p,d.end,d.i===d.n-1?'deadline':'night',d)}
+  <div class="sum"><span><b>${p.seq.length}곳</b></span><span>정류장 대기 <b>${p.wait}분</b></span><span>${esc(d.endOrigin.name)} 도착 <b>${hm(p.end)}</b></span></div>
+  <p class="why">${d.i===0?`${esc(d.origin.name)}에서 출발해 `:`${d.autoStart?'숙소에서 출발해 ':`숙소에서 ${hm(d.start)}에 출발해 `}`}${d.i===d.n-1?`${hm(d.end)}까지 ${esc(d.endOrigin.name)}(으)로 돌아오는 일정이에요.`:`${d.autoEnd?`숙소(${esc(d.endOrigin.name)})로 들어가는 일정이에요.`:`${hm(d.end)}까지 숙소(${esc(d.endOrigin.name)})로 들어가는 일정이에요.`}`} 앞날에 간 곳은 겹치지 않게 뺐어요.${d.autoStart?` 숙소 출발은 미정이라 버스 시간에 맞춰 출발 시각(<b>${hm(d.start)}</b>)을 정했어요.`:''}${d.autoEnd?` 숙소 도착은 미정이라 일정이 끝나는 시각(<b>${hm(p.end)}</b>)에 맞췄어요. 늦어도 21:00 전에 들어가게 짰어요.`:''}</p>
+  ${S.multiMiss&&S.multiMiss.length?`<p class="alert">${S.multiMiss.map(i=>byId(i).name).join(', ')}은(는) 일정 안에 넣지 못했어요. 시간을 늘리거나 다른 장소를 빼 보세요.</p>`:''}
+  ${p.seq.length?'':'<p class="alert">이날은 시간 안에 다녀올 곳이 없어 숙소 이동만 넣었어요.</p>'}
+  ${edBar()}
+  ${routeMap(p.steps)}
+  ${tl(p.steps,null,d.autoEnd?null:d.end)}
+  ${S.exclude.length?`<p class="hint">뺀 장소: ${S.exclude.map(i=>byId(i).name).join(', ')} · <button class="mini" data-act="unexclude">되돌리기</button></p>`:''}
+  <button class="btn" data-act="confirm">이 일정으로 확정</button><button class="btn ghost" data-act="go" data-to="pre2">키워드 바꾸기</button>`;S.viewDate=null;return html}
+function edCtx(){if(S.multi){const d=S.multi[S.tab];return{p:d.plan,start:d.start,deadline:d.end,origin:d.origin,endOrigin:d.endOrigin,all:S.multi.flatMap(x=>x.plan.seq)}}
+ const p=S.plans[S.tab];return{p,start:tm(S.form.start),deadline:tm(S.form.deadline),origin:S.form.origin,endOrigin:S.form.origin,all:p.seq}}
+function resim(c){const p=c.p;p.stays=p.stays||{};p.at=p.at||{};p.win=p.win||{};const r=sim(p.seq,{t:c.start,loc:'hub',deadline:c.deadline,mult:p.mult,start:true,origin:c.origin,endOrigin:c.endOrigin,stays:p.stays,at:p.at,win:p.win});
+ if(!r)return false;p.steps=r.steps;p.end=r.end;p.wait=r.wait;p.late=r.ok?0:Math.max(1,r.end-c.deadline);p.tight=!r.ok&&r.end<=c.deadline;return true}
+function edApply(fn){const c=edCtx(),p=c.p,snap=JSON.stringify({seq:p.seq,stays:p.stays||{},at:p.at||{},win:p.win||{}});p.stays=p.stays||{};p.at=p.at||{};p.win=p.win||{};fn(p,c);
+ if(!resim(c)){const f=SIMFAIL,o=JSON.parse(snap);p.seq=o.seq;p.stays=o.stays;p.at=o.at;p.win=o.win;resim(c);S.edMsg=`${(byId(f)||{name:'그 장소'}).name}에 맞는 버스가 더 없어서 바꾸지 않았어요. 시간을 조금 당겨 보세요.`}else S.edMsg=''}
+function edCtl(s){const id=s.p.id,c=edCtx(),i=c.p.seq.indexOf(id),n=c.p.seq.length;
+ return`<span class="ectl"><span class="erow"><button data-act="ed" data-op="minus" data-id="${id}" aria-label="${esc(s.p.name)} 10분 줄이기">−10분</button><b>${s.base}분</b><button data-act="ed" data-op="plus" data-id="${id}" aria-label="${esc(s.p.name)} 10분 늘리기">+10분</button>
+  <button data-act="ed" data-op="up" data-id="${id}" ${i===0?'disabled':''} aria-label="앞으로">▲</button><button data-act="ed" data-op="down" data-id="${id}" ${i===n-1?'disabled':''} aria-label="뒤로">▼</button><button class="del" data-act="ed" data-op="del" data-id="${id}">빼기</button></span>
+  <label class="erow">도착 희망 <input type="time" step="600" data-edat="${id}" value="${s.want!=null?hm(s.want):''}">${s.want!=null?`<button data-act="ed" data-op="clearat" data-id="${id}">지우기</button>`:''}</label></span>`}
+function lateMsg(p){return p.late>0?(p.tight?`<p class="alert">귀가 기준까지 여유가 10분도 안 돼요. 버스가 조금만 늦어도 위험해요.</p>`:`<p class="alert">귀가 기준보다 ${p.late}분 늦어져요. 머무는 시간을 줄이거나 장소를 빼 주세요.</p>`):''}
+function edCommand(text){const c=edCtx(),log=[];let last=null;
+ const parts=text.split(/,|，|그리고|그 ?다음에?|하고 나서|\.|;/).map(x=>x.trim()).filter(Boolean);
+ for(const part of parts){const sp=' '+part+' ';const ids=[...new Set(placeW().filter(([re])=>re.test(sp)).map(x=>x[1]))];
+  let rest=part,mins=0;const hm_=rest.match(/(\d+)\s*시간\s*(반)?/);if(hm_){mins+=+hm_[1]*60+(hm_[2]?30:0);rest=rest.replace(hm_[0],' ')}
+  const mm=rest.match(/(\d+)\s*분/);if(mm&&!/시\s*\d+\s*분/.test(rest)){mins+=+mm[1];rest=rest.replace(mm[0],' ')}
+  const tmM=rest.match(/(오전|오후|아침|점심|저녁)?\s*(\d{1,2})\s*시\s*(반|\d{1,2}\s*분)?/);
+  const del=/빼|삭제|안 ?가|취소|없애|지워/.test(part),add=/추가|넣어|가고 ?싶|들르|들러|가 ?볼|가자|갈래|가고싶/.test(part);
+  const more=/더|늘|오래|길게|여유/.test(part),less=/줄|덜|짧게|조금만|빨리/.test(part)||(mins&&del);
+  const tripTime=tmM?/^\s*(에|에서)?\s*(출발|까지|귀가|ITX|KTX|기차|열차|막차)/.test(part.slice(part.indexOf(tmM[0])+tmM[0].length)):false;
+  const WINS={'아침':[420,600],'오전':[0,720],'점심':[690,810],'오후':[720,1080],'저녁':[1050,1200],'밤':[1110,1260]};
+  const wM=(!tmM||tripTime)?part.match(/(아침|오전|점심|오후|저녁|밤)/):null;
+  let at=null;if(tmM&&!tripTime){let h=+tmM[2],mi=tmM[3]?(tmM[3]==='반'?30:parseInt(tmM[3])):0;if((tmM[1]==='오후'||tmM[1]==='저녁')&&h<12)h+=12;else if(!tmM[1]&&h<8)h+=12;at=h*60+mi}
+  const place=(p,id,key=at)=>{const ar={};p.steps.forEach(x=>{if(x.k==='stay')ar[x.p.id]=x.arr});const others=p.seq.filter(x=>x!==id);let k=others.findIndex(x=>(p.at[x]??(p.win[x]?p.win[x].from:null)??ar[x]??0)>key);if(k<0)k=others.length;others.splice(k,0,id);p.seq=others};
+  let id=ids[0]||null;
+  if(!id&&(add||/하나|한 ?곳/.test(part))){const tg=DICT.filter(([re])=>re.test(sp)).map(x=>x[1]);
+   if(tg.length){const cand=P.filter(x=>!c.all.includes(x.id)).sort((a,b)=>scorePlace(b,tg,[])-scorePlace(a,tg,[]));if(cand[0]&&scorePlace(cand[0],tg,[])>1)id=cand[0].id}}
+  if(!id)id=last;
+  if(!id){log.push({bad:true,t:`"${part}"에서 장소를 찾지 못했어요`});continue}
+  last=id;const nm=byId(id).name,inPlan=c.p.seq.includes(id);
+  if(del&&!mins){if(inPlan){edApply(p=>{p.seq.splice(p.seq.indexOf(id),1);delete p.stays[id];delete p.at[id];delete p.win[id]});log.push({t:`${nm} 뺐어요`})}else log.push({bad:true,t:`${nm}은(는) 일정에 없어요`});continue}
+  if(!inPlan){if(c.all.includes(id)){log.push({bad:true,t:`${nm}은(는) 다른 날 일정에 있어요`});continue}
+   edApply(p=>{p.seq.push(id);if(at!=null){p.at[id]=at;place(p,id)}});if(c.p.seq.includes(id))log.push({t:at!=null?`${nm} 추가 · ${hm(at)} 도착`:`${nm} 추가했어요`});else{log.push({bad:true,t:S.edMsg||`${nm}을(를) 넣지 못했어요`});continue}}
+  if(/먼저|처음|첫 ?번째|맨 ?앞/.test(part)){edApply(p=>{p.seq.splice(p.seq.indexOf(id),1);p.seq.unshift(id)});log.push({t:`${nm} → 맨 앞으로 옮겼어요`})}
+  else if(/마지막|맨 ?끝|나중에|맨 ?뒤/.test(part)){edApply(p=>{p.seq.splice(p.seq.indexOf(id),1);p.seq.push(id)});log.push({t:`${nm} → 맨 뒤로 옮겼어요`})}
+  if(at!=null&&inPlan){edApply(p=>{p.at[id]=at;place(p,id)});log.push(S.edMsg?{bad:true,t:S.edMsg}:{t:`${nm} ${hm(at)} 도착으로 맞췄어요`})}
+  if(wM){const lb=wM[1],[f0,t0]=WINS[lb],from=Math.max(f0,c.start),key=lb==='오전'||lb==='아침'?c.start:from;
+   edApply(p=>{p.win[id]={label:lb,from,to:t0};if(from>c.start+30&&lb!=='오전')p.at[id]=from;else delete p.at[id];place(p,id,key)});
+   const s2=c.p.steps.find(x=>x.k==='stay'&&x.p.id===id);
+   if(S.edMsg)log.push({bad:true,t:S.edMsg});else if(s2&&s2.arr>t0)log.push({bad:true,t:`${nm}은(는) ${lb}에 가기 어려워요 (${hm(s2.arr)} 도착). 앞 일정을 줄이거나 빼 주세요.`});else log.push({t:`${nm} ${lb}에 가도록 맞췄어요${s2?` (${hm(s2.arr)} 도착)`:''}`})}
+  const st=c.p.steps.find(x=>x.k==='stay'&&x.p.id===id),cur=(c.p.stays||{})[id]??(st?st.base:60);
+  let nv=null;if(mins){nv=less?Math.max(10,cur-mins):more&&inPlan?cur+mins:mins}else if(inPlan&&!add&&more)nv=cur+30;else if(inPlan&&less)nv=Math.max(10,cur-20);
+  if(nv!=null){edApply(p=>{p.stays[id]=nv});log.push(S.edMsg?{bad:true,t:S.edMsg}:{t:`${nm} ${nv}분 머물기`})}}
+ edOrder(text,c,log);
+ if(!log.length)log.push({bad:true,t:'바꿀 내용을 찾지 못했어요'});if(c.p.late>0)log.push({bad:true,t:`지금 일정은 귀가 기준보다 ${c.p.late}분 늦어요. 줄이거나 빼 주세요.`});S.edLog=log}
+function edOrder(text,c,log){const hits=[];for(const[re,id]of placeW()){const g=new RegExp(re.source,'g');const m=g.exec(text);if(m)hits.push({id,i:m.index})}
+ hits.sort((a,b)=>a.i-b.i);let ord=[...new Set(hits.map(h=>h.id))].filter(id=>c.p.seq.includes(id));if(ord.length<2)return;
+ if(!/다음|나서|후에|뒤에|이후|먼저|가고|보고|들렀다|하고|먹고|전에|그리고/.test(text))return;
+ if(/전에/.test(text)&&ord.length===2)ord=ord.reverse();
+ const before=c.p.seq.join();edApply(p=>{const slots=p.seq.map((id,i)=>ord.includes(id)?i:-1).filter(i=>i>=0);slots.forEach((sl,k)=>{p.seq[sl]=ord[k]})});
+ if(S.edMsg)log.push({bad:true,t:`그 순서로는 버스 시간이 맞지 않아요. ${S.edMsg}`});else if(c.p.seq.join()!==before)log.push({t:`순서: ${ord.map(i=>byId(i).name).join(' → ')}`});else log.push({t:`이미 ${ord.map(i=>byId(i).name).join(' → ')} 순서예요`})}
+function edBar(){const c=edCtx(),p=c.p;
+ return`${lateMsg(p)}<div class="edcmd"><b>일정 바꾸기</b><p>하고 싶은 걸 말하거나 써 주세요. 예: "닭갈비 30분 더", "케이블카 3시에", "공지천 추가", "소양강댐 빼줘", "카페 하나 넣어줘"</p>
+  <form class="textin" id="edForm"><button type="button" class="mic${S.listening==='ed'?' on':''}" data-act="mic" data-target="ed" aria-label="음성으로 말하기" aria-pressed="${S.listening==='ed'}"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><rect x="8.5" y="3" width="7" height="12" rx="3.5" fill="currentColor"/><path d="M5.5 11.5a6.5 6.5 0 0 0 13 0M12 18v3" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/></svg></button><input id="edText" value="${esc(S.edText||'')}" placeholder="예: 레고랜드 2시에 가고 싶어" aria-label="일정 바꾸기"><button>바꾸기</button></form>
+  ${S.micMsgT&&S.screen==='pre3'?`<p class="hint">${esc(S.micMsgT)}</p>`:''}${S.edLog&&S.edLog.length?`<ul class="edlog">${S.edLog.map(x=>`<li class="${x.bad?'bad':''}">${esc(x.t)}</li>`).join('')}</ul>`:''}
+  <div class="edopts"><button class="mini" data-act="edit">${S.edit?'세부 버튼 숨기기':'버튼으로 고치기'}</button><button class="mini" data-act="edReset">추천 일정으로 되돌리기</button></div></div>`}
+const spotOf=id=>{for(const r of Object.values(REG)){const p=r.places.find(x=>x.id===id);if(p)return{p,r}}return null};
+function howTo(p,r){return p.remote?`${r.hub.name}에서 <span class="rno">${p.remote.no}번</span> 버스 ${p.remote.ride}분`:`${r.hub.name}에서 도보·시내버스 ${p.walk}분`}
+function introHTML(p){const it=INTRO[p.id];if(!it)return'';
+ return`<details class="intro"><summary>어떤 곳인가요?</summary><p>${esc(it.d)}</p><ul>${it.h.map(x=>`<li>${esc(x)}</li>`).join('')}</ul>${it.tip?`<p class="itip">${esc(it.tip)}</p>`:''}</details>`}
+function spotCard(p,r,full){const it=INTRO[p.id]||{d:'',h:[],tip:''};
+ return`<article class="spot"><div class="sph"><b>${esc(p.name)}</b>${viewSpot(p)?'<span class="badge b-sun">노을·전망 명소</span>':''}${p.indoor?'<span class="badge b-me">실내</span>':''}</div>
+  <p class="spd">${esc(it.d)}</p>${full?`<ul class="sph2">${it.h.map(x=>`<li>${esc(x)}</li>`).join('')}</ul>`:''}
+  <p class="spm"><span>가는 법</span>${howTo(p,r)}</p><p class="spm"><span>추천 시간</span>${p.stay>=120?Math.round(p.stay/60)+'시간 정도':p.stay+'분 정도'}</p>
+  ${full&&it.tip?`<p class="sptip">${esc(it.tip)}</p>`:''}
+  <div class="sptags">${p.tags.map(x=>`<span>#${esc(x)}</span>`).join('')}</div>
+  <button class="btn ghost spgo" data-act="spotPlan" data-id="${p.id}">이곳 넣어서 일정 짜기</button></article>`}
+const regionSeg=()=>`<div class="seg" role="radiogroup" aria-label="여행 지역">${Object.values(REG).map(r=>`<button role="radio" aria-checked="${r.id===REGION.id}" class="${r.id===REGION.id?'on':''}" data-act="region" data-r="${r.id}">${r.name}</button>`).join('')}</div>`;
+const screens={
+ home(){const td=saved.find(t=>t.date===today||(t.days&&t.days.some(d=>d.date===today)));
+  const pre=`<button class="mode" data-act="go" data-to="pre1">${illoPre}<div><b>여행 전</b><span>키워드만 고르면 버스 시간에 맞춘 하루 코스를 짜 드려요</span></div></button>`;
+  const dur=`<button class="mode${td?' hot':''}" data-act="tripEntry">${illoDur}<div>${td?'<span class="tag">오늘 여행</span>':''}<b>여행 중</b><span>${td?esc(td.title)+' · 남은 일정과 다음 버스 확인':'지금 있는 곳에서 바로 일정 받기, 중간에 키워드로 바꾸기'}</span></div></button>`;
+  return`<h1>오시드래요!<br>어떤 여행을 도와드릴까요?</h1><p class="lead">버스가 한두 시간에 한 대뿐인 강원도, 시간 맞추기는 저희가 할게요.</p><p class="regions">지금 쓸 수 있는 지역 <b>춘천</b> <b>강릉</b></p>${td?dur+pre:pre+dur}<button class="mode lite" data-act="go" data-to="spots"><span class="lic" aria-hidden="true"></span><div><b>여행지 둘러보기</b><span>춘천·강릉에서 버스로 갈 수 있는 곳 소개</span></div></button>
+  ${saved.length?`<h2>저장한 일정</h2>${saved.map((t,i)=>`<div class="saved"><div><b>${esc(t.title)}</b><br><small>${REG[t.region||'cc'].name} · ${t.multi?DUR[t.days.length-1]+' · ':''}${t.date} · ${esc(t.origin||'')} ${t.start} 출발 · ${t.seq.length}곳</small></div><button class="mini" data-act="openSaved" data-i="${i}">여행 시작</button><button class="mini" data-act="delSaved" data-i="${i}">삭제</button></div>`).join('')}`:''}
+  <p class="foot">버스 시간표·노선 번호와 근처 가게 이름은 화면 시연용 예시입니다. 정식 버전은 국토교통부 TAGO 버스 정보와 지자체 시간표를 연결합니다.</p>`},
+ spots(){const f=S.spotTag||'';const tags=[...new Set(P.flatMap(p=>p.tags))];const list=P.filter(p=>!f||p.tags.includes(f));
+  return`${regionSeg()}<h1>${REGION.name} 여행지 둘러보기</h1><p class="lead">버스로 갈 수 있는 곳만 모았어요. 마음에 드는 곳을 골라 바로 일정을 짤 수 있어요.</p>
+  <div class="chips spf"><button class="chip${!f?' on':''}" data-act="spotTag" data-k="">전체</button>${tags.map(k=>`<button class="chip${f===k?' on':''}" data-act="spotTag" data-k="${esc(k)}">${esc(k)}</button>`).join('')}</div>
+  ${list.map(p=>spotCard(p,REGION,true)).join('')}<p class="foot">버스 노선 번호와 걸리는 시간은 시연용 예시예요. 운영 시간과 요금은 방문 전에 각 시설에서 확인해 주세요.</p>`},
+ pre1(){const f=S.form;return`${regionSeg()}<h1>언제, 어디서 출발하세요?</h1><p class="lead">출발한 곳으로 귀가 시각까지 꼭 돌아오게 짜 드려요.</p>
+  ${originPicker('출발지')}
+  <div class="f"><span class="fl">여행 기간</span><div class="seg dur" role="radiogroup">${DUR.map((d,i)=>`<button role="radio" aria-checked="${f.days===i+1}" class="${f.days===i+1?'on':''}" data-act="days" data-n="${i+1}">${d}</button>`).join('')}</div></div>
+  <label class="f">${f.days>1?'첫날 날짜':'날짜'}<input type="date" data-f="date" value="${f.date}"></label>${S.viewDate=null,sunLine()}
+  <div class="row2"><label class="f">${f.days>1?'첫날 출발':'출발 시각'}<input type="time" data-f="start" value="${f.start}" step="600"></label>
+  <label class="f">${f.days>1?'마지막 날 귀가':'귀가 기준 시각'}<input type="time" data-f="deadline" value="${f.deadline}" step="600"></label></div>
+  ${f.days>1?`<label class="f">숙소 위치<select data-f="stay" data-rr="1">${ORIGINS.map(o=>`<option${o.name===stayOf().name?' selected':''}>${esc(o.name)}</option>`).join('')}</select></label>
+  <div class="row2"><div class="f"><span class="fl">${f.days>2?'숙소 도착(매일)':'첫날 숙소 도착'}</span><input class="tin" type="time" data-f="night" value="${f.night}" step="600"${f.nightAuto?' disabled':''} aria-label="숙소 도착 시각"><label class="undec"><input type="checkbox" data-f="nightAuto"${f.nightAuto?' checked':''}> 미정 · 알아서 정해 주세요</label></div>
+  <div class="f"><span class="fl">${f.days>2?'숙소 출발(매일)':'둘째 날 출발'}</span><input class="tin" type="time" data-f="morning" value="${f.morning}" step="600"${f.morningAuto?' disabled':''} aria-label="숙소 출발 시각"><label class="undec"><input type="checkbox" data-f="morningAuto"${f.morningAuto?' checked':''}> 미정 · 알아서 정해 주세요</label></div></div>`:''}
+  <label class="f">귀가 수단<select data-f="mode">${['기차','시외·고속버스','막차까지 여행'].map(m=>`<option${m===f.mode?' selected':''}>${m}</option>`).join('')}</select></label>
+  <button class="btn" data-act="go" data-to="pre2">다음 · 키워드 고르기</button>`},
+ pre2(){return`<h1>${REGION.name}에서 어떤 여행이 좋으세요?</h1><p class="lead">고른 키워드에 맞는 곳을, 버스 시간에 맞는 순서로 이어 드려요.</p>
+  ${Object.entries(kwFor()).map(([g,a])=>`<div class="grp"><h3>${g}</h3><div class="chips">${a.map(k=>`<button class="chip${S.tags.includes(k)?' on':''}" data-act="tag" data-k="${k}" aria-pressed="${S.tags.includes(k)}">${k}</button>`).join('')}</div></div>`).join('')}
+  <div class="grp"><h3>직접 말하기 (선택)</h3><div class="textin"><button type="button" class="mic${S.listening==='kw'?' on':''}" data-act="mic" data-target="kw" aria-label="음성으로 말하기" aria-pressed="${S.listening==='kw'}"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><rect x="8.5" y="3" width="7" height="12" rx="3.5" fill="currentColor"/><path d="M5.5 11.5a6.5 6.5 0 0 0 13 0M12 18v3" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/></svg></button><input id="kwText" value="${esc(S.text)}" placeholder="${REGION.id==='gn'?'예: 10시 출발해서 경포 보고 순두부, 6시 KTX':'예: 10시 출발해서 소양강댐 보고 닭갈비, 5시 ITX'}"></div>
+  <p class="hint" id="micHint-kw">${S.listening==='kw'?'듣고 있어요… 다 말하면 마이크를 한 번 더 눌러 주세요.':S.micMsg||'마이크를 눌러 말하거나 직접 써 주세요. 장소 이름, 먹고 싶은 것, 시간까지 알아서 읽어요.'}</p></div>
+  ${S.msg?`<p class="alert">${esc(S.msg)}</p>`:''}
+  <button class="btn" data-act="build">일정 만들기</button>`},
+ pre3(){if(S.multi)return pre3multi();S.viewDate=null;const p=S.plans[S.tab],dl=tm(S.form.deadline);
+  return`<h1>버스 시간에 맞춘 일정이에요</h1>
+  <div class="tabs" role="tablist">${S.plans.map((x,i)=>`<button role="tab" class="${i===S.tab?'on':''}" data-act="tab" data-i="${i}" aria-selected="${i===S.tab}">${['추천','다른 안 1','다른 안 2'][i]}</button>`).join('')}</div>
+  ${sunLine()}${sunAlert(p)}
+  <div class="sum"><span><b>${p.seq.length}곳</b></span><span>정류장 대기 <b>${p.wait}분</b></span><span>${esc(S.form.origin.name)} 도착 <b>${hm(p.end)}</b></span></div>
+  <p class="why">${p.matched.length?`'${p.matched.join("', '")}' 키워드에 맞는 곳을 골랐고, `:''}${p.seq.length>1?'배차가 드문 곳을 먼저 넣어 고립되지 않게 순서를 맞췄어요.':'버스 시간에 맞춰 머무는 시간을 정했어요.'}${(()=>{const z=sunNow(),tg=S.allTags||[],x=[];if(tg.includes('일몰')){const st=p.steps.find(q=>sees(q,z.set));if(st)x.push(` 일몰(${hm(z.set)}) 때 ${st.p.name}에 있도록 맞췄어요.`)}if(tg.includes('일출')){const st=p.steps.find(q=>sees(q,z.rise));if(st)x.push(` 일출(${hm(z.rise)}) 때 ${st.p.name}에 있도록 맞췄어요.`)}return esc(x.join(''))})()}</p>
+  ${(()=>{const tx=S.parsed||{},bits=[];if(tx.origin)bits.push(`출발지 ${tx.origin.name}`);if(tx.must&&tx.must.length)bits.push('가고 싶은 곳 '+tx.must.map(i=>byId(i).name).join(', '));if(tx.tags&&tx.tags.length)bits.push('키워드 '+tx.tags.join(', '));if(tx.start!=null)bits.push(hm(tx.start)+' 출발');if(tx.deadline!=null)bits.push(hm(tx.deadline)+' 귀가');
+   const miss=(S.must||[]).filter(i=>!p.seq.includes(i));
+   return(bits.length?`<p class="hint">입력에서 읽은 내용: ${esc(bits.join(' · '))}</p>`:'')+(S.short?`<p class="alert">시간이 짧아서 머무는 시간을 평소의 절반으로 줄여 넣었어요.</p>`:'')+(miss.length?`<p class="alert">${miss.map(i=>byId(i).name).join(', ')}은(는) 귀가 시각 안에 다녀올 수 없어 이 안에서는 빠졌어요. 귀가 시각을 늦추거나 다른 장소를 빼 보세요.</p>`:'')})()}
+  ${edBar()}
+  ${routeMap(p.steps)}
+  ${tl(p.steps,null,dl)}
+  ${S.exclude.length?`<p class="hint">뺀 장소: ${S.exclude.map(i=>byId(i).name).join(', ')} · <button class="mini" data-act="unexclude">되돌리기</button></p>`:''}
+  <button class="btn" data-act="confirm">이 일정으로 확정</button><button class="btn ghost" data-act="go" data-to="pre2">키워드 바꾸기</button>`},
+ pre4(){const t=saved[0];return`<div class="check">✓</div><h1>일정을 저장했어요</h1><p class="lead">${esc(t.title)} · ${t.date} ${esc(t.origin)} ${t.start} 출발<br>여행 전날 버스 운행에 바뀐 점이 있으면 알려 드릴게요. 여행 날에는 '여행 중' 화면이 먼저 열려요.${t.multi?' 여행 중 화면 위에서 날짜(1일차, 2일차)를 바꿔 볼 수 있어요.':''}</p>
+  <button class="btn coral" data-act="openSaved" data-i="0">지금 여행 중 화면 미리 보기</button><button class="btn ghost" data-act="go" data-to="home">처음으로</button>`},
+ quick(){return`${regionSeg()}<h1>지금 어디에 계세요?</h1><p class="lead">지금 있는 곳에서 출발해 귀가 시각까지 이곳으로 돌아오는 일정을 바로 짜 드려요.</p>
+  ${originPicker('지금 있는 곳')}
+  <div class="row2"><label class="f">지금 시각(시연)<input type="time" data-f="qnow" value="${S.form.qnow||'11:00'}" step="600"></label><label class="f">귀가 기준 시각<input type="time" data-f="deadline" value="${S.form.deadline}" step="600"></label></div>
+  ${Object.entries(kwFor()).map(([g,a])=>`<div class="grp"><h3>${g}</h3><div class="chips">${a.map(k=>`<button class="chip${S.tags.includes(k)?' on':''}" data-act="tag" data-k="${k}">${k}</button>`).join('')}</div></div>`).join('')}
+  ${S.msg?`<p class="alert">${esc(S.msg)}</p>`:''}<button class="btn coral" data-act="quickGo">지금부터 일정 받기</button>`},
+ trip(){const T=S.trip,now=T.now,st=T.steps,dl=T.deadline;
+  const cur=st.find(s=>s.k==='stay'&&s.arr<=now&&now<s.leave),onBus=st.find(s=>s.k==='bus'&&s.dep<=now&&now<s.arr),end=st.at(-1);
+  const nx=st.find(s=>s.k==='bus'&&s.dep>=now);
+  let where=cur?`지금 ${esc(cur.p.name)} · ${cur.leave-now}분 더 머물 수 있어요`:onBus?`버스 이동 중 · ${esc(onBus.to)} ${hm(onBus.arr)} 도착`:now>=end.t?`여행 끝! 귀가 기준까지 ${dl-now}분 여유`:now<st[0].t?'출발 전이에요':(()=>{const ow=st.find(s=>s.origin);if(ow&&now<ow.t+ow.min)return`${esc(T.origin.name)}에서 출발해요 · ${HUB.name}까지 ${ow.min}분`;const a=anchorOf(st,now),n=st[a.i];return a.hub&&n&&n.k==='bus'?`${HUB.name}에서 다음 버스를 기다리는 중`:`${esc(n&&n.to||n&&n.p&&n.p.name||'다음 장소')}(으)로 이동해요`})();
+  const big=nx?`<div class="big"><strong>${nx.dep-now}분</strong><span>뒤 다음 버스</span></div><div class="sub"><span class="rno w">${nx.no}번</span> ${hm(nx.dep)} ${esc(nx.fromStop||nx.from)}에서 타서 ${esc(nx.toStop||nx.to)}에서 내려요  · 정류장에 ${hm(nx.dep-5)}까지</div>`:`<div class="big"><strong>${hm(end.t)}</strong><span>춘천역 도착</span></div><div class="sub">남은 버스가 없어요</div>`;
+  const al=S.loc.mode!=='real'&&S.loc.mode!=='demo'&&nx&&nx.dep-5-now<=10&&nx.dep-5-now>=0&&!onBus?`<div class="alert">지금 정류장으로 출발하세요 (${nx.dep-5-now}분 남음)</div>`:'';
+  const perm=S.loc.mode==='off'?`<div class="perm" id="perm"><b>내 위치를 켜 주세요</b><p>지금 있는 곳을 알아야 정류장까지 걷는 시간과 출발할 시각을 정확히 알려 드려요. 위치는 이 기기 안에서만 쓰고 서버에 저장하지 않아요.</p><div class="row2"><button class="btn" data-act="locAllow">위치 사용 허용</button><button class="btn ghost" data-act="locLater">나중에</button></div></div>`:'';
+  return`${T.saved&&T.saved.multi?`<div class="tabs">${T.saved.days.map((d,i)=>`<button class="${i===T.day?'on':''}" data-act="tripDay" data-i="${i}">${i+1}일차 · ${md(d.date)}</button>`).join('')}</div>`:''}${perm}<div class="status"><div class="where">${where}</div>${big}${al}</div><div id="guidebox">${guideHTML()}</div><div id="locbox">${locHTML()}</div>${sunLine()}
+  ${nx?`<button class="miss" data-act="missed">버스를 놓쳤어요!</button>`:''}
+  <div class="demo">시연용 시계 <b>${hm(now)}</b><button data-act="clock" data-d="-10">−10분</button><button data-act="clock" data-d="10">+10분</button><button data-act="clock" data-d="30">+30분</button><button data-act="nextStep">다음 단계로</button><button class="x" data-act="cancelBus">결행 발생</button>${S.loc.mode==='demo'?`<button data-act="locFar">${S.loc.far?'정류장 쪽으로 돌아오기':'정류장에서 800m 멀어지기'}</button>`:''}</div>
+  ${routeMap(st,{now,me:(locNow()||{}).ll})}
+  ${tl(st,now,T.autoEnd?null:dl)}
+  <p class="foot">정식 버전에서는 휴대폰 시계와 실시간 버스 도착 정보로 자동 갱신됩니다.</p>`}};
+/* 음성 입력: 앱 받아쓰기(dictation) → 없으면 브라우저 음성 인식 */
+let DIC=null,REC=null,micBase='',micTarget=null;
+try{window.claude&&window.claude.use&&window.claude.use('dictation').then(d=>{if(!d)return;DIC=d;
+ d.onPartial(({text})=>micShow(text,false));d.onFinal(({text})=>micShow(text,true));
+ d.onState(({state})=>{if(state==='listening')return;micEnd()})}).catch(()=>{})}catch(e){}
+const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+function micInput(){return document.getElementById(micTarget==='trip'?'tripText':micTarget==='ed'?'edText':'kwText')}
+function micShow(text,final){const v=(micBase+(micBase&&text?' ':'')+text).trim();if(final)micBase=v;
+ if(micTarget==='trip')S.tripText=v;else if(micTarget==='ed')S.edText=v;else S.text=v;const el=micInput();if(el)el.value=v}
+function micUpd(){document.querySelectorAll('.mic').forEach(b=>{const on=S.listening===b.dataset.target;b.classList.toggle('on',on);b.setAttribute('aria-pressed',on)});
+ const h1=document.getElementById('micHint-kw');if(h1)h1.textContent=S.listening==='kw'?'듣고 있어요… 다 말하면 마이크를 한 번 더 눌러 주세요.':(S.micMsg||'마이크를 눌러 말하거나 직접 써 주세요. 장소 이름, 먹고 싶은 것, 시간까지 알아서 읽어요.');
+ const h2=document.getElementById('micHint-trip');if(h2){h2.hidden=!(S.listening==='trip'||S.micMsgT);h2.textContent=S.listening==='trip'?'듣고 있어요… 말을 마치면 알아서 보내요.':(S.micMsgT||'')}}
+function micFail(why){const m=why==='denied'?'마이크 권한이 거부돼서 음성 입력을 쓸 수 없어요. 직접 써 주세요.':'이 화면에서는 음성 입력을 쓸 수 없어요. 직접 써 주세요.';
+ if(micTarget==='trip'||micTarget==='ed')S.micMsgT=m;else S.micMsg=m;S.listening=null;micUpd()}
+function micEnd(){const t=micTarget;S.listening=null;micUpd();
+ if(t==='ed'&&(S.edText||'').trim()&&S.screen==='pre3'){const v=S.edText.trim();S.edText='';edCommand(v);render();return}
+ if(t==='trip'&&S.tripText.trim()&&S.screen==='trip'){const v=S.tripText.trim();S.tripText='';tripSay(v);render()}}
+function micToggle(target){
+ if(S.listening){if(DIC)DIC.stop().catch(()=>{});else if(REC)REC.stop();return}
+ micTarget=target;S.micMsg='';S.micMsgT='';const el=micInput();micBase=(el?el.value:'').trim();
+ if(DIC){S.listening=target;micUpd();DIC.start().catch(e=>micFail(String(e&&(e.code||e.message||e)).includes('not_granted')?'denied':'x'));return}
+ if(SR){try{REC=new SR();REC.lang='ko-KR';REC.interimResults=true;REC.continuous=false;
+  REC.onresult=ev=>{let fin='',mid='';for(let i=ev.resultIndex;i<ev.results.length;i++){const r=ev.results[i];if(r.isFinal)fin+=r[0].transcript;else mid+=r[0].transcript}if(fin)micShow(fin,true);else micShow(mid,false)};
+  REC.onerror=ev=>micFail(ev.error==='not-allowed'||ev.error==='service-not-allowed'?'denied':'x');REC.onend=()=>{if(S.listening)micEnd()};
+  S.listening=target;micUpd();REC.start()}catch(e){micFail('x')}return}
+ micFail('x')}
+const tripChips=['노을 보고 싶어','배고파','카페 가고 싶어','비 와요','피곤해','시간 남아요','더 있고 싶어','화장실'];
+function render(){MAPS=[];
+ $('#back').innerHTML=S.screen==='home'?'':`<button data-act="back" aria-label="뒤로">←</button>`;
+ app.innerHTML=screens[S.screen]();
+ dock.innerHTML=S.screen==='trip'?`<div><div class="chips">${tripChips.map(k=>`<button class="chip" data-act="say" data-k="${k}">${k}</button>`).join('')}</div><form class="textin" id="tripForm"><button type="button" class="mic${S.listening==='trip'?' on':''}" data-act="mic" data-target="trip" aria-label="음성으로 말하기" aria-pressed="${S.listening==='trip'}"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><rect x="8.5" y="3" width="7" height="12" rx="3.5" fill="currentColor"/><path d="M5.5 11.5a6.5 6.5 0 0 0 13 0M12 18v3" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/></svg></button><input id="tripText" value="${esc(S.tripText)}" placeholder="지금 상황을 말하거나 써 주세요" aria-label="여행 중 키워드"><button>보내기</button></form><p class="hint" id="micHint-trip"${S.listening==='trip'||S.micMsgT?'':' hidden'}>${S.listening==='trip'?'듣고 있어요… 말을 마치면 알아서 보내요.':esc(S.micMsgT||'')}</p></div>`:'';
+ layer.innerHTML=S.sheet?`<div class="scrim" data-act="closeSheet"><div class="sheet" role="dialog" aria-modal="true">${S.sheet.html}<button class="btn ghost" data-act="closeSheet">닫기</button></div></div>`:'';drawK()}
+const prev={spots:'home',pre1:'home',pre2:'pre1',pre3:'pre2',pre4:'home',quick:'home',trip:'home'};
+function build(){S.edit=false;S.edMsg='';S.edLog=[];const rg=regionOf(S.text);if(rg&&rg!==REGION.id){setRegion(rg);S.form.origin=ORIGINS[0];S.exclude=[];S.fromQ=''}
+ const tx=parseText(S.text);const tags=[...new Set(S.tags.concat(tx.tags))];
+ if(tx.start!=null)S.form.start=hm(tx.start);if(tx.deadline!=null)S.form.deadline=hm(tx.deadline);
+ if(tx.origin){S.form.origin=tx.origin;S.fromQ=''}
+ S.must=tx.must;S.allTags=tags;S.parsed=tx;
+ if(S.form.days>1){const n=S.form.days,st=stayOf(),used=[],days=[];
+  const NIGHT_CAP=tm('21:00');
+  for(let i=0;i<n;i++){const date=addDays(S.form.date,i),sun=sunTimes(date,HUB.ll),origin=i===0?S.form.origin:st,endOrigin=i===n-1?S.form.origin:st;
+   const autoStart=i>0&&!!S.form.morningAuto,autoEnd=i<n-1&&!!S.form.nightAuto;
+   const end=i===n-1?tm(S.form.deadline):autoEnd?NIGHT_CAP:tm(S.form.night);
+   const base={sun,deadline:end,tags,must:tx.must.filter(m=>!used.includes(m)),exclude:S.exclude.concat(used),origin,endOrigin};
+   let start=i===0?tm(S.form.start):tm(S.form.morning),p=null;
+   if(autoStart){let lo=tm('07:30');if(tags.includes('일출'))lo=Math.max(lo,sun.rise+40);let best=null;
+    for(let t0=lo;t0<=Math.max(lo,tm('10:00'));t0+=10){const q=makePlans({...base,start:t0})[0];if(!q)continue;const sc=q.v+.004*(t0-lo);if(!best||sc>best.sc)best={sc,q,t0}}
+    if(best){p=best.q;start=best.t0}}
+   else p=makePlans({...base,start})[0];
+   if(!p){const r=sim([],{t:start,loc:'hub',deadline:end,start:true,origin,endOrigin});p={seq:[],steps:r.steps,end:r.end,wait:0,mult:1,matched:[]}}
+   used.push(...p.seq);days.push({i,n,date,start,end,origin,endOrigin,plan:p,autoStart,autoEnd})}
+  const miss=tx.must.filter(m=>!used.includes(m));S.multi=days;S.multiMiss=miss;S.msg='';S.tab=Math.min(S.tab,n-1);S.screen='pre3';return}
+ S.multi=null;
+ const po={sun:sunTimes(S.form.date,HUB.ll),start:tm(S.form.start),deadline:tm(S.form.deadline),tags,must:tx.must,exclude:S.exclude,origin:S.form.origin};
+ let plans=makePlans(po);S.short=false;
+ if(tx.must.length&&(!plans.length||!plans[0].seq.some(i=>tx.must.includes(i)))){const sp=makePlans({...po,mult:.5});if(sp.length&&sp[0].seq.some(i=>tx.must.includes(i))){plans=sp;S.short=true}}
+ if(!plans.length&&tx.must.length){S.msg=`${tx.must.map(i=>byId(i).name).join(', ')}은(는) ${S.form.start}~${S.form.deadline} 사이에는 버스로 다녀올 수 없어요. 출발을 당기거나 귀가 시각을 늦춰 보세요.`;S.screen='pre2';return}
+ if(!plans.length){S.msg='조건에 맞는 일정이 없어요. 귀가 시각을 늦추거나 키워드를 줄여 보세요.';S.screen='pre2';return}
+ S.msg='';S.plans=plans;S.tab=Math.min(S.tab,plans.length-1);S.screen='pre3';
+ if(/(아침|오전|점심|오후|저녁|먼저|다음|나서|전에|후에|뒤에)/.test(S.text)&&tx.must.length){S.tab=0;edCommand(S.text);S.edLog=[{t:'입력한 순서와 시간대에 맞춰 고쳤어요'}].concat(S.edLog.filter(x=>!/장소를 찾지 못했어요|바꿀 내용/.test(x.t)))}}
+function startTrip(seq,steps,o){S.trip={win:o.win||{},stays:o.stays||{},at:o.at||{},date:o.date||today,steps,deadline:o.deadline,mult:o.mult,tags:o.tags||[],now:steps[0].t,title:o.title,origin:o.origin||ORIGINS[0],endOrigin:o.endOrigin||o.origin||ORIGINS[0]};S.screen='trip';S.sheet=null}
+function diffLines(a,b,dl){const A=stays(a),B=stays(b),out=[];
+ A.forEach(s=>{const n=B.find(x=>x.p.id===s.p.id);if(!n)out.push(`빠지는 곳: ${s.p.name}`);else if(n.leave!==s.leave)out.push(`${s.p.name} 출발 ${hm(s.leave)} → ${hm(n.leave)}`)});
+ B.forEach(s=>{if(!A.find(x=>x.p.id===s.p.id))out.push(`추가: ${s.p.name} (${hm(s.arr)} 도착)`)});
+ const e1=a.at(-1).t,e2=b.at(-1).t;if(e1!==e2)out.push(`${a.at(-1).at} 도착 ${hm(e1)} → ${hm(e2)} (귀가까지 ${dl-e2}분 여유)`);
+ return out}
+let acts=[];
+const card=(title,lines,btn,act)=>{const i=acts.push(act)-1;return`<div class="card"><b>${esc(title)}</b>${lines.map(l=>`<p class="${/→|빠지는|추가/.test(l)?'chg':''}">${esc(l)}</p>`).join('')}${btn?`<button class="btn" data-act="apply" data-i="${i}">${btn}</button>`:''}</div>`};
+function openSheet(title,lead,cards){S.sheet={html:`<h2>${esc(title)}</h2><p class="lead">${esc(lead)}</p>${cards.join('')}`}}
+const replanCard=(title,extraLines,r,btn,extra)=>{const T=S.trip;if(!r)return card(title,['남은 버스로는 귀가 시간에 맞출 수 없어요'],null);
+ const lines=extraLines.concat(diffLines(T.steps,r.steps,T.deadline));if(r.dropped.length)lines.push('귀가 시간을 지키려고 빠지는 곳: '+r.dropped.map(i=>byId(i).name).join(', '));
+ return card(title,lines,btn,{type:'replan',steps:r.steps,extra})};
+function context(){const T=S.trip,a=anchorOf(T.steps,T.now);
+ if(a.stay){const from=Math.max(T.now,a.stay.arr);return{a,place:a.stay.p,from,until:a.stay.leave,label:a.stay.arr>T.now?`${a.stay.p.name}에 도착하면`:`${a.stay.p.name}에서`}}
+ const nx=T.steps.slice(a.i).find(s=>s.k==='bus'||s.k==='walk');return{a,place:HUB,from:T.now,until:nx?(nx.k==='bus'?nx.dep-5:nx.t):T.deadline-10,label:`${HUB.name}에서`}}
+function tryInsert(a,seq,id){const T=S.trip;let best=null;
+ for(let k=0;k<=seq.length;k++){const s=seq.slice();s.splice(k,0,id);const r=replanFrom(T.steps,a,s,{deadline:T.deadline,mult:T.mult,origin:T.origin,endOrigin:T.endOrigin,stays:T.stays,at:T.at,win:T.win});
+  if(r&&!r.dropped.length&&(!best||r.end<best.end))best=r}return best}
+function tripSay(text){const T=S.trip;acts=[];const it=intentOf(text);
+ if(!it){openSheet('무슨 뜻인지 잘 모르겠어요','아래 키워드를 눌러 보세요: 배고파, 카페, 비 와요, 피곤해, 시간 남아요, 더 있고 싶어, 장소 이름',[]);return}
+ if(it.k==='missed'){planB('missed');return}
+ const c=context(),a=c.a,seq=restSeq(T.steps,a),visited=stays(T.steps).map(s=>s.p.id),avail=c.until-c.from;
+ const spotCards=(types,need,title)=>c.place.near.filter(x=>types.includes(x.type)).map(x=>{const can=avail-2*x.walk-2;
+  return can>=need?card(`${x.n} · 도보 ${x.walk}분`,[`최대 ${Math.min(can,60)}분 머물 수 있어요`,`${hm(c.until)}까지 정류장으로 돌아오면 돼요`],a.stay?'일정에 넣기':null,{type:'extra',i:a.i,name:x.n,mins:Math.min(can,x.type==='food'?50:30)})
+   :card(`${x.n} · 도보 ${x.walk}분`,[`지금은 ${Math.max(avail,0)}분뿐이라 ${title}에는 빠듯해요`],null)});
+ if(['food','cafe','toilet'].includes(it.k)){const need={food:25,cafe:15,toilet:3}[it.k],nm={food:'식사',cafe:'카페',toilet:'화장실'}[it.k];
+  const cards=spotCards(it.k==='food'?['food']:it.k==='cafe'?['cafe']:['toilet'],need,nm);
+  if(it.k!=='toilet'&&a.stay&&avail<need+15){const r=replanFrom(T.steps,a,seq,{deadline:T.deadline,mult:T.mult,origin:T.origin,endOrigin:T.endOrigin,stays:T.stays,at:T.at,win:T.win,extend:a.stay.p.remote?1:30});
+   cards.push(replanCard(a.stay.p.remote?`다음 버스로 미루고 여유 있게 ${nm}`:`30분 더 머물며 ${nm}`,[],r,'이렇게 바꾸기',{name:c.place.near.find(x=>x.type===it.k).n,mins:it.k==='food'?50:30}))}
+  if(it.k==='food'){P.filter(p=>p.meal&&!visited.includes(p.id)).forEach(p=>{const r=tryInsert(a,seq,p.id);if(r)cards.push(replanCard(`${p.name} 일정에 넣기`,[],r,'일정에 넣기'))})}
+  openSheet(`${c.label} ${nm}`,`다음 버스 시간을 넘기지 않는 곳만 보여 드려요.`,cards.slice(0,5));return}
+ if(it.k==='sunset'||it.k==='sunrise'){const z=sunNow(),t=it.k==='sunset'?z.set:z.rise,nm=it.k==='sunset'?'일몰':'일출';
+  if(it.k==='sunrise'&&T.now>z.rise){openSheet(`오늘 일출(${hm(z.rise)})은 지났어요`,'내일 아침에 다시 물어봐 주세요.',[]);return}
+  if(T.deadline-10<t){openSheet(`${nm}(${hm(t)})은 귀가 시각 뒤예요`,`귀가 기준 ${hm(T.deadline)} 전에 ${nm}을 볼 수 없어요. 귀가를 늦출 수 있으면 새 일정을 만들어 주세요.`,[]);return}
+  if(T.steps.some(s=>sees(s,t))){const s=T.steps.find(x=>sees(x,t));openSheet(`${nm} ${hm(t)}`,`이미 ${s.p.name}에서 ${nm}을 볼 수 있는 일정이에요.`,[]);return}
+  const cards=[];for(const p of P.filter(x=>viewSpot(x)&&!visited.includes(x.id))){const r=tryInsert(a,seq,p.id);if(r&&r.steps.some(s=>sees(s,t)))cards.push(replanCard(`${p.name}에서 ${nm} 보기`,[p.tags.join(' · ')],r,'일정에 넣기'));if(cards.length===3)break}
+  openSheet(`${nm} ${hm(t)}`,cards.length?`${nm} 시간에 머물 수 있는 곳이에요.`:`지금 일정과 버스 시간으로는 ${nm} 시간에 맞춰 갈 수 있는 곳이 없어요.`,cards);return}
+ if(it.k==='rain'){const out=seq.filter(id=>!byId(id).indoor),pool=P.filter(p=>p.indoor&&!visited.includes(p.id)).map(p=>p.id);
+  const ns=seq.map(id=>byId(id).indoor?id:pool.shift()||null).filter(Boolean);const cards=[];
+  if(out.length)cards.push(replanCard('남은 야외 일정을 실내로 바꾸기',[`바뀌는 곳: ${out.map(i=>byId(i).name).join(', ')}`],replanFrom(T.steps,a,ns,{deadline:T.deadline,mult:T.mult,origin:T.origin,endOrigin:T.endOrigin,stays:T.stays,at:T.at,win:T.win}),'실내 일정으로 바꾸기'));
+  cards.push(...spotCards(['cafe','rest'],10,'잠깐 비 피하기'));
+  openSheet('비가 오네요','남은 일정과 지금 있는 곳 근처에서 비를 피할 방법이에요.',cards);return}
+ if(it.k==='tired'){const tgt=seq.find(id=>byId(id).tags.some(t=>t==='등산'||t==='걷기'))||seq.at(-1);const cards=[];
+  if(tgt)cards.push(replanCard(`${byId(tgt).name} 빼고 쉬엄쉬엄`,[],replanFrom(T.steps,a,seq.filter(x=>x!==tgt),{deadline:T.deadline,mult:T.mult,origin:T.origin,endOrigin:T.endOrigin,stays:T.stays,at:T.at,win:T.win}),'이 장소 빼기'));
+  cards.push(...spotCards(['rest','cafe'],10,'쉬기'));openSheet('조금 쉬어 갈까요?','걷는 일정을 줄이거나 근처 실내에서 쉬어요.',cards);return}
+ if(it.k==='spare'){const cands=P.filter(p=>!visited.includes(p.id)).sort((x,y)=>scorePlace(y,T.tags,[])-scorePlace(x,T.tags,[]));const cards=[];
+  for(const p of cands){const r=tryInsert(a,seq,p.id);if(r)cards.push(replanCard(`${p.name} 더 가기`,[p.tags.join(' · ')],r,'일정에 넣기'));if(cards.length===3)break}
+  if(!cards.length){openSheet('더 갈 곳은 빠듯해요','귀가 시각까지 남은 시간으로는 새 장소를 넣기 어려워요. 근처에서 쉬어 가세요.',spotCards(['cafe','rest'],10,'쉬기'));return}
+  openSheet('시간이 남았네요','귀가 시간을 지키면서 더 갈 수 있는 곳이에요.',cards);return}
+ if(it.k==='stay'){if(!a.stay){openSheet('지금은 이동 사이예요','장소에 도착한 뒤 다시 눌러 주세요.',[]);return}
+  const r=replanFrom(T.steps,a,seq,{deadline:T.deadline,mult:T.mult,origin:T.origin,endOrigin:T.endOrigin,stays:T.stays,at:T.at,win:T.win,extend:a.stay.p.remote?1:30});
+  openSheet(`${a.stay.p.name}에 더 머물기`,a.stay.p.remote?'다음 배차 버스로 미뤄요.':'30분 더 머물러요.',[replanCard('이렇게 바뀌어요',[],r,'더 머물기')]);return}
+ if(it.k==='place'){const p=byId(it.id);if(visited.includes(p.id)){openSheet(p.name,'이미 일정에 있는 곳이에요.',[]);return}
+  const r=tryInsert(a,seq,p.id);openSheet(`${p.name} 가기`,'귀가 시간을 지키면서 넣을 수 있는지 계산했어요.',[r?replanCard('일정에 넣으면',[],r,'일정에 넣기'):card('넣기 어려워요',['남은 버스 시간으로는 귀가 시간 전에 다녀올 수 없어요'],null)]);return}}
+function drtCard(now){
+ if(REGION.id==='gn'){const open=now>=480&&now<1080;
+  return`<div class="card drt"><b>강릉 시티콜버스 부르기</b><p>버스를 기다리기 어려우면 부르면 오는 수요응답형 버스(DRT)를 이용해요. 셔클(Shucle) 앱이나 콜센터로 호출해요.</p>
+  <p class="chg">${open?'지금 운행 중이에요 (08:00~18:00)':'지금은 운행 시간이 아니에요 (08:00~18:00)'} · 실증 기간 무료</p>
+  <div class="drtbtn"><a class="btn" href="https://play.google.com/store/search?q=%EC%85%94%ED%81%B4&c=apps" target="_blank" rel="noopener">셔클 앱 열기</a><a class="btn ghost" href="tel:15330777">콜센터 1533-0777</a></div>
+  <p class="note">전화가 안 걸리면 1533-0777로 직접 걸어 주세요. 운행 정보는 2026년 8월 실증 시작 기준이라 바뀔 수 있어요.</p></div>`}
+ return`<div class="card drt"><b>택시로 이동하기</b><p>${REGION.name}에서는 여행자가 호출할 수 있는 수요응답형 버스(DRT)를 아직 확인하지 못했어요. 급하면 택시를 이용해 주세요.</p><p class="note">${REGION.name} DRT가 확인되면 여기에 호출 버튼이 생겨요.</p></div>`}
+function planB(reason){const T=S.trip;acts=[];const b=T.steps.find(s=>s.k==='bus'&&s.arr>T.now&&s.dep>=T.now-30);
+ if(!b){openSheet('남은 버스가 없어요',`${T.origin.name}까지 도보·시내버스로 이동하면 돼요.`,[]);return}
+ if(b.dep<=T.now&&T.now<b.arr&&reason==='missed'&&T.now-b.dep<0){}
+ const idx=T.steps.indexOf(b);let a;
+ if(reason==='missed')T.now=Math.max(T.now,b.dep+1);else CANCEL.add(b.key);
+ if(b.fromHub)a={i:idx,hub:true,t:reason==='missed'?T.now-5:Math.max(T.now,b.dep-5)};else a={i:idx-1,stay:T.steps[idx-1],minLeave:reason==='missed'?T.now-5:T.steps[idx-1].leave};
+ const seq=restSeq(T.steps,a),r=replanFrom(T.steps,a,seq,{deadline:T.deadline,mult:T.mult,origin:T.origin,endOrigin:T.endOrigin,stays:T.stays,at:T.at,win:T.win});
+ const here=b.fromHub?HUB:b.p,title=reason==='missed'?'버스를 놓쳤어요 · Plan B':`${hm(b.dep)} ${b.no}번 버스 결행 · Plan B`;
+ if(!r){openSheet(title,`오늘 남은 버스로는 귀가 시간 전에 ${T.origin.name}에 닿기 어려워요.`,[drtCard(T.now)]);return}
+ const nb2=r.steps.find(s=>s.k==='bus'&&s.dep>=T.now),w=nb2?nb2.dep-T.now:0,spot=here.near.find(x=>x.type==='cafe')||here.near[0];
+ const extra=w>=20&&!b.fromHub?{name:'대기: '+spot.n,mins:w-2*spot.walk-5}:null;
+ openSheet(title,`${esc(here.name)} 기준으로 다시 계산했어요.`,[
+  replanCard(nb2?`다음 ${nb2.no}번 버스 ${hm(nb2.dep)} (${w}분 뒤)`:'남은 일정 다시 짜기',[],r,'Plan B로 바꾸기',extra),
+  w>=20?card(`기다리는 동안 ${spot.n} · 도보 ${spot.walk}분`,[`실내에서 ${w-2*spot.walk-5}분 쉬다가 ${hm(nb2.dep-5)}까지 정류장으로`],null):'',
+  drtCard(T.now)])}
+document.addEventListener('click',e=>{const el=e.target.closest('[data-act]');if(!el)return;const act=el.dataset.act;
+ if(act==='closeSheet'&&el.classList.contains('scrim')&&e.target!==el)return;
+ const T=S.trip;
+ switch(act){
+  case'go':if(S.listening)micToggle();S.screen=el.dataset.to;S.msg='';break;
+  case'back':S.screen=prev[S.screen]||'home';S.sheet=null;break;
+  case'tag':{const k=el.dataset.k,i=S.tags.indexOf(k);i<0?S.tags.push(k):S.tags.splice(i,1);
+   if(k==='여유롭게'||k==='알차게'){const o=k==='여유롭게'?'알차게':'여유롭게';S.tags=S.tags.filter(x=>x!==o||x===k)}break}
+  case'locAllow':locAllow();return;
+  case'locLater':S.loc={mode:'later'};break;
+  case'locFar':S.loc.far=!S.loc.far;break;
+  case'locFind':S.loc.pendingQuick=true;S.locMsg='';locAllow();render();return;
+  case'setDeadline':S.form[el.dataset.f||'deadline']=el.dataset.t;S.text=S.text.replace(/(오전|오후|저녁)?\s*\d{1,2}\s*(시|:)\s*(반|\d{1,2}\s*분?)?\s*(ITX|KTX|기차|열차|귀가|막차|까지)/g,'').trim();build();break;
+  case'setStart':S.form.start=el.dataset.t;build();break;
+  case'mic':micToggle(el.dataset.target);return;
+  case'days':S.form.days=+el.dataset.n;if(S.form.days>1&&!S.form.stay)S.form.stay=stayOf().name;break;
+  case'edit':S.edit=!S.edit;S.edMsg='';break;
+  case'edReset':S.edit=false;build();S.edLog=[{t:'추천 일정으로 되돌렸어요'}];break;
+  case'ed':{const id=el.dataset.id,op=el.dataset.op;edApply((p,c)=>{const st=p.steps.find(x=>x.k==='stay'&&x.p.id===id),cur=p.stays[id]??(st?st.base:60),i=p.seq.indexOf(id);
+    if(op==='minus')p.stays[id]=Math.max(10,cur-10);if(op==='plus')p.stays[id]=cur+10;
+    if(op==='up'&&i>0){p.seq.splice(i,1);p.seq.splice(i-1,0,id)}if(op==='down'&&i<p.seq.length-1){p.seq.splice(i,1);p.seq.splice(i+1,0,id)}
+    if(op==='del'){p.seq.splice(i,1);delete p.stays[id];delete p.at[id]}if(op==='clearat')delete p.at[id]});break}
+  case'spotTag':S.spotTag=el.dataset.k;break;
+  case'spot':{const x=spotOf(el.dataset.id);if(x){acts=[];S.sheet={html:`${spotCard(x.p,x.r,true).replace(/<button class="btn ghost spgo"[^>]*>[^<]*<\/button>/,'')}`}}break}
+  case'spotPlan':{const x=spotOf(el.dataset.id);setRegion(x.r.id);S.form.origin=ORIGINS[0];S.exclude=[];S.text=`${x.p.name} 가고 싶어`;S.sheet=null;S.screen='pre2';break}
+  case'region':{S.spotTag='';setRegion(el.dataset.r);S.form.stay='';S.form.origin=ORIGINS[0];S.exclude=[];S.fromQ='';S.fromOpen=false;const ok=new Set(Object.values(kwFor()).flat());S.tags=S.tags.filter(k=>ok.has(k));break}
+  case'pickOrigin':S.locMsg='';S.form.origin=originByName(el.dataset.n);S.fromQ='';S.fromOpen=false;S.exclude=[];break;
+  case'build':S.exclude=[];S.tab=0;build();break;
+  case'tab':S.tab=+el.dataset.i;break;
+  case'drop':S.exclude.push(el.dataset.id);build();break;
+  case'unexclude':S.exclude=[];build();break;
+  case'confirm':{if(S.multi){const all=S.multi.flatMap(d=>d.plan.seq).map(i=>byId(i).name);
+    saved.unshift({multi:true,title:DUR[S.multi.length-1]+' · '+all.slice(0,2).join(' · ')+(all.length>2?` 외 ${all.length-2}곳`:''),region:REGION.id,date:S.form.date,origin:S.form.origin.name,start:S.form.start,deadline:S.form.deadline,mult:S.multi[0].plan.mult,tags:S.allTags,seq:S.multi.flatMap(d=>d.plan.seq),
+     days:S.multi.map(d=>({autoEnd:d.autoEnd,date:d.date,start:hm(d.start),end:hm(d.end),origin:d.origin.name,endOrigin:d.endOrigin.name,seq:d.plan.seq,mult:d.plan.mult,stays:d.plan.stays||{},at:d.plan.at||{},win:d.plan.win||{}}))});persist();S.screen='pre4';break}
+   const p=S.plans[S.tab],names=p.seq.map(i=>byId(i).name);
+   saved.unshift({title:names.slice(0,2).join(' · ')+(names.length>2?` 외 ${names.length-2}곳`:''),region:REGION.id,date:S.form.date,origin:S.form.origin.name,start:S.form.start,deadline:S.form.deadline,mult:p.mult,seq:p.seq,stays:p.stays||{},at:p.at||{},win:p.win||{},tags:S.allTags});persist();S.screen='pre4';break}
+  case'openSaved':openTrip(saved[+el.dataset.i]);break;
+  case'tripDay':openTrip(S.trip.saved,+el.dataset.i);break;
+  case'delSaved':saved.splice(+el.dataset.i,1);persist();break;
+  case'tripEntry':{const td=saved.findIndex(t=>t.date===today||(t.days&&t.days.some(d=>d.date===today)));if(td>=0){openTrip(saved[td])}else{S.screen='quick';S.msg=''}break}
+  case'quickGo':{const st=tm(S.form.qnow||'11:00'),plans=makePlans({sun:sunTimes(S.form.date,HUB.ll),start:st,deadline:tm(S.form.deadline),tags:S.tags,must:[],origin:S.form.origin});
+   if(!plans.length){S.msg='지금부터 귀가 시각까지는 다녀올 곳이 없어요. 귀가 시각을 늦춰 보세요.';break}
+   startTrip(plans[0].seq,plans[0].steps,{deadline:tm(S.form.deadline),mult:plans[0].mult,tags:S.tags,title:S.form.origin.name+'에서 지금부터',origin:S.form.origin});break}
+  case'clock':T.now=Math.max(T.steps[0].t-30,T.now+ +el.dataset.d);break;
+  case'nextStep':{const n=T.steps.map(s=>s.k==='stay'?s.arr:s.k==='bus'?s.dep:s.t).find(t=>t>T.now);if(n!=null)T.now=n;break}
+  case'missed':planB('missed');break;
+  case'cancelBus':planB('cancel');break;
+  case'say':tripSay(el.dataset.k);break;
+  case'apply':{const x=acts[+el.dataset.i];
+   if(x.type==='extra')T.steps[x.i].extras.push({name:x.name,mins:x.mins});
+   else{const a=anchorOf(T.steps,T.now);T.steps=x.steps;if(x.extra){const s=T.steps[a.i];if(s&&s.k==='stay')s.extras.push(x.extra)}}
+   S.sheet=null;break}
+  case'closeSheet':S.sheet=null;break;
+  default:return}
+ render();window.scrollTo&&act!=='apply'&&act!=='closeSheet'&&act!=='say'&&act!=='tag'&&act!=='clock'&&act!=='nextStep'&&act!=='pickOrigin'&&act!=='spot'&&act!=='spotTag'&&act!=='ed'&&act!=='edit'&&act!=='days'&&act!=='region'&&window.scrollTo(0,0)});
+document.addEventListener('input',e=>{const f=e.target.dataset&&e.target.dataset.f;if(f&&e.target.type!=='checkbox')S.form[f]=e.target.value;if(e.target.id==='kwText')S.text=e.target.value;if(e.target.id==='tripText')S.tripText=e.target.value;if(e.target.id==='edText')S.edText=e.target.value;if(e.target.id==='fromQ'){S.fromQ=e.target.value;const l=$('#fromList');l.hidden=false;l.innerHTML=originList()}});
+document.addEventListener('focusin',e=>{if(e.target.id==='fromQ'&&!S.fromOpen){S.fromOpen=true;const l=$('#fromList');l.hidden=false;l.innerHTML=originList();e.target.setAttribute('aria-expanded','true')}});
+document.addEventListener('change',e=>{if(e.target.dataset&&e.target.dataset.edat){const id=e.target.dataset.edat,v=e.target.value;edApply(p=>{if(v)p.at[id]=tm(v);else delete p.at[id]});render();return}
+ if(e.target.dataset&&e.target.dataset.edadd){const id=e.target.value;if(id){edApply(p=>{p.seq.push(id)});render()}return}
+ const f=e.target.dataset&&e.target.dataset.f;if(f&&e.target.type==='checkbox'){S.form[f]=e.target.checked;render();return}if(f){S.form[f]=e.target.value;if((f==='date'||f==='stay')&&S.screen==='pre1')render()}});
+document.addEventListener('submit',e=>{if(e.target.id==='edForm'){e.preventDefault();const v=(S.edText||'').trim();if(!v)return;S.edText='';edCommand(v);render();return}
+ if(e.target.id==='tripForm'){e.preventDefault();const v=S.tripText.trim();if(!v)return;S.tripText='';tripSay(v);render()}});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&S.sheet){S.sheet=null;render()}if(e.key==='Enter'&&e.target.id==='fromQ'){e.preventDefault();const r=searchOrigins(S.fromQ);if(r.length){S.form.origin=r[0];S.fromQ='';S.fromOpen=false;render()}}
+ if(e.key==='Enter'&&e.target.id==='kwText'){e.preventDefault();S.exclude=[];S.tab=0;build();render()}});
+render();
+setInterval(()=>{if(API_BASE&&S.screen==='trip'){const g=document.getElementById('guidebox');if(g){g.innerHTML=guideHTML();drawK()}}},30000);
+}
+</script>
+</body>
+</html>
