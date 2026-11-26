@@ -98,7 +98,7 @@ div.f{margin:0 0 16px}
 .spd{margin:8px 0;font-size:15.5px}.sph2{margin:0 0 8px;padding-left:18px;font-size:15px}.sph2 li{margin:2px 0}
 .spm{margin:4px 0;font-size:15px;display:flex;gap:8px;align-items:baseline}.spm span:first-child{flex:none;font-size:13px;color:var(--mute);width:62px}
 .sptip{background:var(--lake2);border-radius:10px;padding:8px 10px;font-size:14px;margin:8px 0}.sptags{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0 0}.sptags span{font-size:13px;color:var(--lake)}
-.spgo{margin-top:10px;min-height:46px;font-size:16px}.spf{margin:0 0 16px}
+.spq{margin:0 0 14px}.spq .hint{margin-top:6px}.spgo{margin-top:10px;min-height:46px;font-size:16px}.spf{margin:0 0 16px}
 .plink{border:0;background:none;padding:0;font:inherit;color:inherit;text-decoration:underline;text-decoration-color:var(--line);text-underline-offset:3px;cursor:pointer;text-align:left}
 .intro{display:block;margin:8px 0 2px;background:var(--lake2);border-radius:12px;color:var(--ink)}
 .intro summary{cursor:pointer;list-style:none;padding:10px 12px;font-size:15px;font-weight:700;color:var(--lake);min-height:44px;display:flex;align-items:center;gap:6px}
@@ -624,6 +624,15 @@ function edBar(){const c=edCtx(),p=c.p;
   <form class="textin" id="edForm"><button type="button" class="mic${S.listening==='ed'?' on':''}" data-act="mic" data-target="ed" aria-label="음성으로 말하기" aria-pressed="${S.listening==='ed'}"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><rect x="8.5" y="3" width="7" height="12" rx="3.5" fill="currentColor"/><path d="M5.5 11.5a6.5 6.5 0 0 0 13 0M12 18v3" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/></svg></button><input id="edText" value="${esc(S.edText||'')}" placeholder="예: 레고랜드 2시에 가고 싶어" aria-label="일정 바꾸기"><button>바꾸기</button></form>
   ${S.micMsgT&&S.screen==='pre3'?`<p class="hint">${esc(S.micMsgT)}</p>`:''}${S.edLog&&S.edLog.length?`<ul class="edlog">${S.edLog.map(x=>`<li class="${x.bad?'bad':''}">${esc(x.t)}</li>`).join('')}</ul>`:''}
   <div class="edopts"><button class="mini" data-act="edit">${S.edit?'세부 버튼 숨기기':'버튼으로 고치기'}</button><button class="mini" data-act="edReset">추천 일정으로 되돌리기</button></div></div>`}
+function spotScore(p,q){const qs=q.replace(/\s/g,''),nm=p.name.replace(/\s|·/g,''),it=INTRO[p.id]||{d:'',h:[],tip:''},txt=[it.d,...it.h,it.tip].join(' ');let s=0;
+ if(nm.includes(qs)||(p.re&&p.re.test(q)))s+=10;if(/^[ㄱ-ㅎ]+$/.test(qs)&&cho(nm).includes(qs))s+=8;
+ DICT.forEach(([re,tg])=>{if(re.test(' '+q+' ')&&p.tags.includes(tg))s+=4});p.tags.forEach(tg=>{if(q.includes(tg))s+=4});
+ q.split(/\s+/).filter(w=>w.length>=2).forEach(w=>{if(txt.includes(w))s+=1});return s}
+function spotList(){const f=S.spotTag||'',q=(S.spotQ||'').trim();let list=P.filter(p=>!f||p.tags.includes(f));
+ if(q){list=list.map(p=>({p,s:spotScore(p,q)})).filter(x=>x.s>0).sort((a,b)=>b.s-a.s).map(x=>x.p)}
+ if(!list.length){const other=regionOf(q),o=other&&other!==REGION.id?REG[other].name:null;
+  return`<div class="empty">${q?`'${esc(q)}'에 맞는 곳을 찾지 못했어요.`:'이 키워드에 맞는 곳이 없어요.'}${o?`<br>${esc(o)} 지역 장소 같아요. <button class="mini" data-act="region" data-r="${other}">${esc(o)}에서 찾기</button>`:'<br>다른 말로 써 보거나 위의 키워드를 바꿔 보세요.'}</div>`}
+ return(q?`<p class="hint" style="margin:0 0 10px">'${esc(q)}'에 맞는 곳 ${list.length}곳</p>`:'')+list.map(p=>spotCard(p,REGION,true)).join('')}
 const spotOf=id=>{for(const r of Object.values(REG)){const p=r.places.find(x=>x.id===id);if(p)return{p,r}}return null};
 function howTo(p,r){return p.remote?`${r.hub.name}에서 <span class="rno">${p.remote.no}번</span> 버스 ${p.remote.ride}분`:`${r.hub.name}에서 도보·시내버스 ${p.walk}분`}
 function introHTML(p){const it=INTRO[p.id];if(!it)return'';
@@ -643,10 +652,11 @@ const screens={
   return`<h1>오시드래요!<br>어떤 여행을 도와드릴까요?</h1><p class="lead">버스가 한두 시간에 한 대뿐인 강원도, 시간 맞추기는 저희가 할게요.</p><div class="regions" role="radiogroup" aria-label="여행 지역">지금 쓸 수 있는 지역 ${Object.values(REG).map(r=>`<button role="radio" aria-checked="${r.id===REGION.id}" class="${r.id===REGION.id?'on':''}" data-act="region" data-r="${r.id}">${r.name}</button>`).join('')}</div>${td?dur+pre:pre+dur}<button class="mode lite" data-act="go" data-to="spots"><span class="lic" aria-hidden="true"></span><div><b>여행지 둘러보기</b><span>춘천·강릉에서 버스로 갈 수 있는 곳 소개</span></div></button>
   ${saved.length?`<h2>저장한 일정</h2>${saved.map((t,i)=>`<div class="saved"><div><b>${esc(t.title)}</b><br><small>${REG[t.region||'cc'].name} · ${t.multi?DUR[t.days.length-1]+' · ':''}${t.date} · ${esc(t.origin||'')} ${t.start} 출발 · ${t.seq.length}곳</small></div><button class="mini" data-act="openSaved" data-i="${i}">여행 시작</button><button class="mini" data-act="delSaved" data-i="${i}">삭제</button></div>`).join('')}`:''}
   <p class="foot">버스 시간표·노선 번호와 근처 가게 이름은 화면 시연용 예시입니다. 정식 버전은 국토교통부 TAGO 버스 정보와 지자체 시간표를 연결합니다.</p>`},
- spots(){const f=S.spotTag||'';const tags=[...new Set(P.flatMap(p=>p.tags))];const list=P.filter(p=>!f||p.tags.includes(f));
+ spots(){const f=S.spotTag||'';const tags=[...new Set(P.flatMap(p=>p.tags))];
   return`${regionSeg()}<h1>${REGION.name} 여행지 둘러보기</h1><p class="lead">버스로 갈 수 있는 곳만 모았어요. 마음에 드는 곳을 골라 바로 일정을 짤 수 있어요.</p>
+  <div class="spq"><label class="fl" for="spotQ">직접 찾아보기</label><input id="spotQ" class="search" type="search" value="${esc(S.spotQ||'')}" placeholder="${REGION.id==='gn'?'예: 바다 보면서 커피, 순두부, 비 오는 날':'예: 호수 보면서 걷기, 닭갈비, 비 오는 날'}" autocomplete="off"><p class="hint">장소 이름, 하고 싶은 것, 먹고 싶은 것을 써 보세요. 초성(ㅅㅇㄱ)도 돼요.</p></div>
   <div class="chips spf"><button class="chip${!f?' on':''}" data-act="spotTag" data-k="">전체</button>${tags.map(k=>`<button class="chip${f===k?' on':''}" data-act="spotTag" data-k="${esc(k)}">${esc(k)}</button>`).join('')}</div>
-  ${list.map(p=>spotCard(p,REGION,true)).join('')}<p class="foot">버스 노선 번호와 걸리는 시간은 시연용 예시예요. 운영 시간과 요금은 방문 전에 각 시설에서 확인해 주세요.</p>`},
+  <div id="spotList">${spotList()}</div><p class="foot">버스 노선 번호와 걸리는 시간은 시연용 예시예요. 운영 시간과 요금은 방문 전에 각 시설에서 확인해 주세요.</p>`},
  pre1(){const f=S.form;return`${regionSeg()}<h1>언제, 어디서 출발하세요?</h1><p class="lead">출발한 곳으로 귀가 시각까지 꼭 돌아오게 짜 드려요.</p>
   ${originPicker('출발지')}
   <div class="f"><span class="fl">여행 기간</span><div class="seg dur" role="radiogroup">${DUR.map((d,i)=>`<button role="radio" aria-checked="${f.days===i+1}" class="${f.days===i+1?'on':''}" data-act="days" data-n="${i+1}">${d}</button>`).join('')}</div></div>
@@ -889,7 +899,7 @@ document.addEventListener('click',e=>{const el=e.target.closest('[data-act]');if
   case'closeSheet':S.sheet=null;break;
   default:return}
  render();window.scrollTo&&act!=='apply'&&act!=='closeSheet'&&act!=='say'&&act!=='tag'&&act!=='clock'&&act!=='nextStep'&&act!=='pickOrigin'&&act!=='spot'&&act!=='spotTag'&&act!=='ed'&&act!=='edit'&&act!=='days'&&act!=='region'&&window.scrollTo(0,0)});
-document.addEventListener('input',e=>{const f=e.target.dataset&&e.target.dataset.f;if(f&&e.target.type!=='checkbox')S.form[f]=e.target.value;if(e.target.id==='kwText')S.text=e.target.value;if(e.target.id==='tripText')S.tripText=e.target.value;if(e.target.id==='edText')S.edText=e.target.value;if(e.target.id==='fromQ'){S.fromQ=e.target.value;const l=$('#fromList');l.hidden=false;l.innerHTML=originList()}});
+document.addEventListener('input',e=>{const f=e.target.dataset&&e.target.dataset.f;if(f&&e.target.type!=='checkbox')S.form[f]=e.target.value;if(e.target.id==='kwText')S.text=e.target.value;if(e.target.id==='tripText')S.tripText=e.target.value;if(e.target.id==='edText')S.edText=e.target.value;if(e.target.id==='spotQ'){S.spotQ=e.target.value;const l=$('#spotList');if(l)l.innerHTML=spotList()}if(e.target.id==='fromQ'){S.fromQ=e.target.value;const l=$('#fromList');l.hidden=false;l.innerHTML=originList()}});
 document.addEventListener('focusin',e=>{if(e.target.id==='fromQ'&&!S.fromOpen){S.fromOpen=true;const l=$('#fromList');l.hidden=false;l.innerHTML=originList();e.target.setAttribute('aria-expanded','true')}});
 document.addEventListener('change',e=>{if(e.target.dataset&&e.target.dataset.edat){const id=e.target.dataset.edat,v=e.target.value;edApply(p=>{if(v)p.at[id]=tm(v);else delete p.at[id]});render();return}
  if(e.target.dataset&&e.target.dataset.edadd){const id=e.target.value;if(id){edApply(p=>{p.seq.push(id)});render()}return}
