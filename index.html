@@ -191,7 +191,7 @@ const near=(food,cafe,toilet,rest)=>[{n:food,type:'food',walk:5},{n:cafe,type:'c
 const REG={
  cc:{id:'cc',name:'춘천',hub:{id:'hub',name:'춘천역',stop:'춘천역 환승센터',ll:[37.8847,127.7167],near:near('역 앞 식당가','역사 안 카페','역 화장실','역 맞이방(실내 대기실)')},
   places:[
- {id:'dam',ll:[37.9453,127.8136],re:/소양강댐|댐/,name:'소양강댐',tags:['자연','호수뷰','전망','사진','걷기'],stay:60,remote:{no:'11',ride:35,out:sch('08:30',60,11),ret:sch('09:20',60,11)},near:near('댐 아래 막국수집','전망 카페','정류장 옆 화장실','댐 관리동 쉼터')},
+ {id:'dam',sr:1,ll:[37.9453,127.8136],re:/소양강댐|댐/,name:'소양강댐',tags:['자연','호수뷰','전망','사진','걷기'],stay:60,remote:{no:'11',ride:35,out:sch('08:30',60,11),ret:sch('09:20',60,11)},near:near('댐 아래 막국수집','전망 카페','정류장 옆 화장실','댐 관리동 쉼터')},
  {id:'mun',ll:[37.818,127.718],re:/김유정|문학촌/,name:'김유정문학촌',tags:['문화','걷기','자연','체험'],stay:60,remote:{no:'67',ride:30,out:sch('08:50',90,7),ret:sch('09:40',90,7)},near:near('실레마을 밥집','마을 북카페','문학촌 화장실','전시관 로비')},
  {id:'fall',ll:[37.806,127.643],re:/구곡|폭포/,name:'구곡폭포',tags:['자연','등산','걷기','사진'],stay:90,remote:{no:'50',ride:40,out:sch('08:40',150,4),ret:sch('09:50',150,4)},near:near('입구 감자전 가게','입구 찻집','주차장 화장실','매표소 쉼터')},
  {id:'ani',ll:[37.871,127.687],re:/애니/,name:'애니메이션박물관',tags:['실내','체험','문화'],stay:70,indoor:1,remote:{no:'82',ride:25,out:sch('09:00',75,8),ret:sch('09:50',75,8)},near:near('박물관 푸드코트','로비 카페','박물관 화장실','관람객 휴게실')},
@@ -201,7 +201,7 @@ const REG={
  {id:'dak',ll:[37.881,127.728],re:/명동|닭갈비/,name:'명동 닭갈비골목',tags:['닭갈비'],stay:60,meal:1,indoor:1,walk:15,near:near('골목 안 닭갈비집','명동 카페','지하상가 화장실','지하상가 쉼터')},
  {id:'market',ll:[37.882,127.7265],re:/중앙시장|낭만시장/,name:'춘천 중앙시장',tags:['시장 먹거리','실내'],stay:40,meal:1,indoor:1,walk:15,near:near('시장 국밥집','시장 커피집','시장 화장실','상인회 쉼터')},
  {id:'yuk',ll:[37.88,127.7295],re:/육림/,name:'육림고개',tags:['카페','사진'],stay:40,walk:15,near:near('고개 아래 분식','골목 카페','공영 화장실','작은 책방')},
- {id:'gong',ll:[37.87,127.716],re:/공지천/,name:'공지천',tags:['자연','호수뷰','걷기','카페'],stay:50,walk:20,near:near('호숫가 식당','공지천 카페거리','공원 화장실','조각공원 정자')},
+ {id:'gong',sr:1,ll:[37.87,127.716],re:/공지천/,name:'공지천',tags:['자연','호수뷰','걷기','카페'],stay:50,walk:20,near:near('호숫가 식당','공지천 카페거리','공원 화장실','조각공원 정자')},
  {id:'sky',ll:[37.889,127.723],re:/스카이워크/,name:'소양강 스카이워크',tags:['호수뷰','전망','사진'],stay:30,walk:20,near:near('강변 닭갈비집','강변 카페','스카이워크 화장실','매표소 대기실')}
 ],
   origins:[
@@ -227,14 +227,14 @@ const REG={
 ]},
  gn:{id:'gn',name:'강릉',hub:{id:'hub',name:'강릉역',stop:'강릉역 정류장',ll:[37.7639,128.8996],near:near('역 앞 식당가','역사 안 카페','역 화장실','역 맞이방(실내 대기실)')},
   places:[
- {id:'gyeongpo',ll:[37.8055,128.908],re:/경포/,name:'경포해변·경포호',tags:['바다','호수뷰','자연','걷기','사진'],stay:70,remote:{no:'202',ride:25,out:sch('08:40',40,15),ret:sch('09:10',40,15)},near:near('해변 횟집','해변 카페','해변 공중화장실','경포호 쉼터')},
- {id:'anmok',ll:[37.7722,128.948],re:/안목|커피거리/,name:'안목해변 커피거리',tags:['바다','카페','사진'],stay:60,remote:{no:'230',ride:20,out:sch('08:50',30,20),ret:sch('09:20',30,20)},near:near('해변 분식집','바다 앞 카페','해변 화장실','카페 거리 쉼터')},
+ {id:'gyeongpo',sr:1,ll:[37.8055,128.908],re:/경포/,name:'경포해변·경포호',tags:['바다','호수뷰','자연','걷기','사진'],stay:70,remote:{no:'202',ride:25,out:sch('08:40',40,15),ret:sch('09:10',40,15)},near:near('해변 횟집','해변 카페','해변 공중화장실','경포호 쉼터')},
+ {id:'anmok',sr:1,ll:[37.7722,128.948],re:/안목|커피거리/,name:'안목해변 커피거리',tags:['바다','카페','사진'],stay:60,remote:{no:'230',ride:20,out:sch('08:50',30,20),ret:sch('09:20',30,20)},near:near('해변 분식집','바다 앞 카페','해변 화장실','카페 거리 쉼터')},
  {id:'ojuk',ll:[37.7792,128.8786],re:/오죽헌/,name:'오죽헌',tags:['문화','걷기','사진'],stay:60,remote:{no:'300',ride:20,out:sch('09:00',50,11),ret:sch('09:35',50,11)},near:near('오죽헌 앞 식당','시립박물관 카페','관람객 화장실','시립박물관 로비')},
  {id:'seongyo',ll:[37.786,128.884],re:/선교장/,name:'선교장',tags:['문화','사진','자연'],stay:50,remote:{no:'202-1',ride:25,out:sch('09:20',70,8),ret:sch('10:05',70,8)},near:near('입구 한식당','한옥 찻집','관람객 화장실','활래정 정자')},
  {id:'chodang',ll:[37.79,128.914],re:/초당|순두부/,name:'초당순두부마을',tags:['순두부'],stay:50,meal:1,indoor:1,remote:{no:'206',ride:20,out:sch('08:30',40,16),ret:sch('09:00',40,16)},near:near('순두부 식당','마을 젤라또 카페','마을 공영화장실','솔밭 쉼터')},
  {id:'sori',ll:[37.793,128.897],re:/참소리|축음기/,name:'참소리축음기박물관',tags:['실내','체험','문화'],stay:60,indoor:1,remote:{no:'202',ride:25,out:sch('09:10',40,14),ret:sch('09:40',40,14)},near:near('박물관 앞 식당','박물관 카페','박물관 화장실','관람객 휴게실')},
  {id:'jumunjin',ll:[37.893,128.827],re:/주문진/,name:'주문진 수산시장',tags:['시장 먹거리','바다'],stay:70,meal:1,remote:{no:'300-1',ride:40,out:sch('08:30',60,11),ret:sch('09:20',60,11)},near:near('시장 회센터','항구 카페','시장 화장실','어민 쉼터')},
- {id:'jeongdong',ll:[37.691,129.034],re:/정동진/,name:'정동진',tags:['바다','사진','전망'],stay:80,remote:{no:'109',ride:45,out:sch('08:20',120,5),ret:sch('09:40',120,5)},near:near('역 앞 식당','바다 전망 카페','역 화장실','정동진역 대합실')},
+ {id:'jeongdong',sr:1,ll:[37.691,129.034],re:/정동진/,name:'정동진',tags:['바다','사진','전망'],stay:80,remote:{no:'109',ride:45,out:sch('08:20',120,5),ret:sch('09:40',120,5)},near:near('역 앞 식당','바다 전망 카페','역 화장실','정동진역 대합실')},
  {id:'haslla',ll:[37.705,129.013],re:/하슬라/,name:'하슬라아트월드',tags:['문화','전망','바다','실내'],stay:90,indoor:1,remote:{no:'112',ride:40,out:sch('09:00',120,5),ret:sch('10:10',120,5)},near:near('미술관 레스토랑','미술관 카페','미술관 화장실','전망 라운지')},
  {id:'jungang',ll:[37.754,128.899],re:/강릉.*중앙시장|중앙시장/,name:'강릉 중앙시장',tags:['시장 먹거리','실내'],stay:40,meal:1,indoor:1,walk:15,near:near('시장 장칼국수집','시장 커피집','시장 화장실','상인회 쉼터')},
  {id:'myeongju',ll:[37.753,128.894],re:/명주동/,name:'명주동 골목',tags:['카페','사진','문화'],stay:40,walk:15,near:near('골목 국숫집','적산가옥 카페','공영 화장실','작은 공연장 로비')},
@@ -267,6 +267,13 @@ function sunTimes(dateStr,ll){const rad=Math.PI/180,dayMs=864e5,J1970=2440588,J2
  const w=Math.acos((Math.sin(-.833*rad)-Math.sin(phi)*Math.sin(dec))/(Math.cos(phi)*Math.cos(dec))),Jset=tr(appr(w)),Jrise=Jnoon-(Jset-Jnoon);
  const km=j=>Math.round(((j+.5-J1970)*dayMs/6e4+540)%1440)-1;return{rise:km(Jrise),set:km(Jset)}}
 const viewSpot=p=>p.tags.some(t=>t==='바다'||t==='호수뷰'||t==='전망');
+/* 일출 명소: 버스가 다니기 전이라 걸어가거나 택시로 가요 */
+function srPlan(org,sun,must,ex){if(!sun)return null;const from=(org&&org.ll)||HUB.ll;
+ const c=P.filter(p=>p.sr&&!(ex||[]).includes(p.id)).map(p=>{const d=distM(from,p.ll);return{p,d,s:(must||[]).includes(p.id)?100:(p.tags.includes('바다')?3:0)+(p.tags.includes('전망')?1:0)-d/4000}}).sort((a,b)=>b.s-a.s);
+ if(!c.length)return null;const{p,d}=c[0],walk=d<1500,min=walk?Math.max(5,Math.ceil(d/67)):Math.max(10,Math.ceil((d/500+5)/5)*5);
+ const arr=Math.floor((sun.rise-15)/5)*5;let leave=arr+45,back=0;
+ if(p.remote){const b=p.remote.ret.find(x=>x>=leave+5);if(b!=null&&b-5-leave<=50)leave=b-5;else back=Math.max(10,Math.ceil((distM(p.ll,HUB.ll)/500+5)/5)*5)}
+ return{id:p.id,arr,leave,min,mode:walk?'walk':'taxi',back,start:arr-min}}
 const sees=(s,t)=>s.k==='stay'&&viewSpot(s.p)&&s.arr<=t-5&&s.leave>=t;
 const distM=(a,b)=>{const R=6371e3,r=x=>x*Math.PI/180,dl=r(b[0]-a[0]),dn=r(b[1]-a[1]),h=Math.sin(dl/2)**2+Math.cos(r(a[0]))*Math.cos(r(b[0]))*Math.sin(dn/2)**2;return 2*R*Math.asin(Math.sqrt(h))};
 function nearestAll(ll){let best=null;for(const r of Object.values(REG)){const pts=[{name:r.hub.name,ll:r.hub.ll,region:r.id,kind:'hub'},...r.places.map(p=>({name:p.name,ll:p.ll,region:r.id,kind:'place',id:p.id})),...r.origins.map(o=>({name:o.name,ll:o.ll,region:r.id,kind:'origin',o}))];
@@ -304,7 +311,11 @@ let SIMFAIL=null;
 function sim(seq,o){SIMFAIL=null;const AT=o.at||{},ST=o.stays||{},WIN=o.win||{};
  let t=o.t,loc=o.loc||'hub',wait=0;const steps=[],mult=o.mult||1;
  const org=o.origin||ORIGINS[0],endOrg=o.endOrigin||org;
- if(o.start){steps.push({k:'start',t,at:org.name});if(org.min){steps.push({k:'walk',from:org.name,to:HUB.name,t,min:org.min,fromHub:false,origin:true});t+=org.min}}
+ if(o.start&&o.sunrise){const sr=o.sunrise,sp=byId(sr.id);steps.push({k:'start',t:sr.start,at:org.name});
+  steps.push({k:'walk',taxi:sr.mode==='taxi',sun:1,from:org.name,to:sp.name,t:sr.start,min:sr.min,fromHub:false});
+  steps.push({k:'stay',p:sp,arr:sr.arr,leave:sr.leave,base:sr.leave-sr.arr,sunrise:1,extras:[]});t=sr.leave;loc=sp.id;
+  if(sr.back){steps.push({k:'walk',taxi:true,from:sp.name,to:HUB.name,t,min:sr.back,fromHub:false});t+=sr.back;loc='hub'}}
+ else if(o.start){steps.push({k:'start',t,at:org.name});if(org.min){steps.push({k:'walk',from:org.name,to:HUB.name,t,min:org.min,fromHub:false,origin:true});t+=org.min}}
  if(o.cur){const p=byId(loc);let leave;
   if(p.remote){const d=nb(p,'ret',t+5);if(d==null)return null;leave=d-5}else leave=Math.max(t,o.cur.arr);
   steps.push({k:'stay',p,arr:o.cur.arr,leave,base:o.cur.base,extras:(o.cur.extras||[]).slice()});t=leave}
@@ -332,11 +343,11 @@ const paceOf=tags=>tags.includes('여유롭게')?{mult:1.25,max:3}:tags.includes
 const FOODK=['닭갈비','막국수','순두부','시장 먹거리'];
 function scorePlace(p,tags,must){return p.tags.filter(x=>tags.includes(x)).reduce((a,x)=>a+(FOODK.includes(x)?25:10),0)+(must.includes(p.id)?100:0)-(tags.includes('적게 걷기')&&p.tags.some(x=>x==='등산'||x==='걷기')?12:0)+1}
 function makePlans(o){
- const tags=o.tags||[],must=o.must||[],ex=(o.exclude||[]).concat(o.origin&&o.origin.pid?[o.origin.pid]:[]),pc=paceOf(tags),mult=o.mult||pc.mult,max=pc.max;
+ const tags=o.tags||[],must=(o.must||[]).filter(m=>!o.sunrise||m!==o.sunrise.id),ex=(o.exclude||[]).concat(o.origin&&o.origin.pid?[o.origin.pid]:[],o.sunrise?[o.sunrise.id]:[]),pc=paceOf(tags),mult=o.mult||pc.mult,max=pc.max;
  const c=P.filter(p=>!ex.includes(p.id)).map(p=>({p,s:scorePlace(p,tags,must)})).sort((a,b)=>b.s-a.s).slice(0,7);
  const out=[];
  const rec=(seq,used)=>{if(seq.length){const ids=seq.map(x=>x.p.id);
-   const r=sim(ids,{t:o.start,loc:'hub',deadline:o.deadline,mult,start:true,origin:o.origin,endOrigin:o.endOrigin});
+   const r=sim(ids,{t:o.start,loc:'hub',deadline:o.deadline,mult,start:true,origin:o.origin,endOrigin:o.endOrigin,sunrise:o.sunrise});
    if(r&&r.ok){const meals=seq.filter(x=>x.p.meal).length,miss=must.filter(m=>!ids.includes(m)).length;
     const lunch=r.steps.some(s=>s.k==='stay'&&s.p.meal&&s.arr>=690&&s.arr<=810);
     const sunB=o.sun?((tags.includes('일몰')&&r.steps.some(s=>sees(s,o.sun.set))?40:0)+(tags.includes('일출')&&r.steps.some(s=>sees(s,o.sun.rise))?40:0)):0;
@@ -345,11 +356,12 @@ function makePlans(o){
   if(seq.length>=max)return;
   c.forEach((x,i)=>{if(!used.has(i)){used.add(i);seq.push(x);rec(seq,used);seq.pop();used.delete(i)}})};
  rec([],new Set());
+ if(o.sunrise&&!out.length){const r=sim([],{t:o.start,loc:'hub',deadline:o.deadline,mult,start:true,origin:o.origin,endOrigin:o.endOrigin,sunrise:o.sunrise});if(r&&r.ok)out.push({ids:[],r,v:0,mult})}
  out.sort((a,b)=>b.v-a.v);
  const pick=[];for(const x of out){const key=x.ids.slice().sort().join();if(pick.some(y=>y.ids.slice().sort().join()===key))continue;
   if(pick.length&&pick.every(y=>y.ids.length===x.ids.length&&x.ids.filter(i=>!y.ids.includes(i)).length<1))continue;
   pick.push(x);if(pick.length===3)break}
- return pick.map(x=>({v:x.v,seq:x.ids,steps:x.r.steps,end:x.r.end,wait:x.r.wait,mult:x.mult,matched:[...new Set(x.ids.flatMap(i=>byId(i).tags.filter(t=>tags.includes(t))))]}))}
+ return pick.map(x=>({sunrise:o.sunrise||null,v:x.v,seq:x.ids,steps:x.r.steps,end:x.r.end,wait:x.r.wait,mult:x.mult,matched:[...new Set(x.ids.flatMap(i=>byId(i).tags.filter(t=>tags.includes(t))))]}))}
 const DICT=[[/일출|해돋이|해 뜨|해뜨/,'일출'],[/일몰|노을|해넘이|석양|해 지|해지/,'일몰'],[/레고|놀이공원|테마파크|놀이기구/,'테마파크'],[/바다|해변|해수욕|파도/,'바다'],[/순두부/,'순두부'],[/닭갈비/,'닭갈비'],[/막국수/,'막국수'],[/카페|커피/,'카페'],[/시장/,'시장 먹거리'],[/호수|강변|강 /,'호수뷰'],[/등산|산행/,'등산'],[/걷|산책/,'걷기'],[/사진|인생샷/,'사진'],[/전망|뷰|경치/,'전망'],[/실내|비 오|비가|비와|비 와/,'실내'],[/문학|문화|역사/,'문화'],[/체험/,'체험'],[/자연|숲/,'자연'],[/여유|천천히|느긋/,'여유롭게'],[/알차|많이 보|빡빡/,'알차게'],[/덜 걷|힘들|조금만 걷/,'적게 걷기']];
 const placeW=()=>P.filter(p=>p.re).map(p=>[p.re,p.id]);
 function parseText(s){const r={tags:[],must:[]};s=' '+s+' ';
@@ -417,10 +429,10 @@ function stepHTML(s,now,dl){
  if(s.k==='start')return`<li class="stay${state}"><span class="t">${hm(s.t)}</span><span class="dot"><i></i></span><span class="c"><b>${s.at} 출발</b></span></li>`;
  if(s.k==='end')return`<li class="stay${state}"><span class="t">${hm(s.t)}</span><span class="dot"><i></i></span><span class="c"><b>${s.at} 도착</b>${dl==null?'오늘 일정 끝':(dl-s.t>=0?`귀가 기준 ${hm(dl)}까지 ${dl-s.t}분 여유`:`<span class="late">귀가 기준 ${hm(dl)}보다 ${s.t-dl}분 늦어요</span>`)}</span></li>`;
  if(s.k==='free')return`<li class="walk free${state}"><span class="t" style="font-size:15px;font-weight:600">${hm(s.t)}</span><span class="dot"><i></i></span><span class="c">자유 시간 ${s.min}분 · ${esc(s.at)} 근처 <span class="badge b-ok">${esc(s.why)} 원하는 도착 시각에 맞춰요</span></span></li>`;
- if(s.k==='walk')return`<li class="walk${state}"><span class="t" style="font-size:15px;font-weight:600">${hm(s.t)}</span><span class="dot"><i></i></span><span class="c">${esc(s.to)}(으)로 이동 · 도보·시내버스 ${s.min}분</span></li>`;
+ if(s.k==='walk')return`<li class="walk${state}"><span class="t" style="font-size:15px;font-weight:600">${hm(s.t)}</span><span class="dot"><i></i></span><span class="c">${esc(s.to)}(으)로 이동 · ${s.taxi?'택시':s.sun?'걸어서':'도보·시내버스'} ${s.min}분${s.taxi&&s.sun?' <span class="badge b-warn">버스가 다니기 전이라 택시로 가요</span>':s.taxi?' <span class="badge b-warn">버스를 오래 기다리지 않게 택시로 가요</span>':''}</span></li>`;
  if(s.k==='bus'){const[g,l]=grade(s.gap);return`<li class="bus${state}"><span class="t">${hm(s.dep)}</span><span class="dot"><i></i></span><span class="c"><b><span class="rno">${s.no}번</span> 버스 · ${esc(s.to)} 방면</b><span class="stops"><span><i class="on">타는 곳</i>${esc(s.fromStop||s.from)}</span><span><i>내리는 곳</i>${esc(s.toStop||s.to)} · ${hm(s.arr)} 도착 (${s.arr-s.dep}분)</span></span><span class="badge ${g}">${l}</span></span></li>`}
  const plus=s.leave-s.arr-s.base;
- return`<li class="stay${state}"><span class="t">${hm(s.arr)}</span><span class="dot"><i></i></span><span class="c"><b><button class="plink" data-act="spot" data-id="${s.p.id}">${esc(s.p.name)}</button></b>${s.leave-s.arr}분 머물기 · ${hm(s.leave)}까지${s.custom?' <span class="badge b-me">직접 정한 시간</span>':''}${s.win?` <span class="badge b-me">${s.win} 희망</span>`:s.want!=null?` <span class="badge b-me">${hm(s.want)} 도착 희망</span>`:''}${plus>0&&s.p.remote?`<br><span class="badge b-ok">버스 시간에 맞춰 +${plus}분 여유</span>`:''}${(()=>{const z=sunNow();return sees(s,z.set)?`<br><span class="badge b-sun">일몰 ${hm(z.set)} · 노을 보기 좋은 곳</span>`:sees(s,z.rise)?`<br><span class="badge b-sun">일출 ${hm(z.rise)} · 해돋이 보기 좋은 곳</span>`:''})()}${introHTML(s.p)}${s.extras.map(x=>`<span class="extra">+ ${esc(x.name)} ${x.mins}분</span>`).join('')}${S.screen==='pre3'&&S.edit?edCtl(s):S.screen==='pre3'?`<br><button class="mini" data-act="drop" data-id="${s.p.id}">이 장소 빼고 다시 짜기</button>`:''}</span></li>`}
+ return`<li class="stay${state}"><span class="t">${hm(s.arr)}</span><span class="dot"><i></i></span><span class="c"><b><button class="plink" data-act="spot" data-id="${s.p.id}">${esc(s.p.name)}</button></b>${s.leave-s.arr}분 머물기 · ${hm(s.leave)}까지${s.custom?' <span class="badge b-me">직접 정한 시간</span>':''}${s.win?` <span class="badge b-me">${s.win} 희망</span>`:s.want!=null?` <span class="badge b-me">${hm(s.want)} 도착 희망</span>`:''}${s.sunrise?`<br><span class="badge b-sun">일출 명소 · 해 뜨기 15분 전 도착</span>${s.p.remote&&s.leave-s.arr>45?` <span class="badge b-ok">첫 버스 ${hm(s.leave+5)}까지 근처에서 아침·산책</span>`:''}`:plus>0&&s.p.remote?`<br><span class="badge b-ok">버스 시간에 맞춰 +${plus}분 여유</span>`:''}${(()=>{const z=sunNow();return sees(s,z.set)?`<br><span class="badge b-sun">일몰 ${hm(z.set)} · 노을 보기 좋은 곳</span>`:sees(s,z.rise)?`<br><span class="badge b-sun">일출 ${hm(z.rise)} · 해돋이 보기 좋은 곳</span>`:''})()}${introHTML(s.p)}${s.extras.map(x=>`<span class="extra">+ ${esc(x.name)} ${x.mins}분</span>`).join('')}${S.screen==='pre3'&&s.sunrise?'':S.screen==='pre3'&&S.edit?edCtl(s):S.screen==='pre3'?`<br><button class="mini" data-act="drop" data-id="${s.p.id}">이 장소 빼고 다시 짜기</button>`:''}</span></li>`}
 function routeMap(steps,o={}){const extra={};[S.form.origin,S.trip&&S.trip.origin,S.trip&&S.trip.endOrigin,...(S.multi||[]).flatMap(d=>[d.origin,d.endOrigin])].forEach(x=>{if(x&&x.ll)extra[x.name]=x.ll});
  const LL=n=>extra[n]||llOfName(n),nodes=[],segs=[],idx=n=>{let k=nodes.findIndex(x=>x.name===n);if(k<0){nodes.push({name:n,ll:LL(n),hub:n===HUB.name});k=nodes.length-1}return k};
  for(const st of steps){if(st.k==='start'||st.k==='end')idx(st.at);else if(st.k==='stay')idx(st.p.name);
@@ -455,10 +467,10 @@ const illoPre=`<svg viewBox="0 0 96 80" aria-hidden="true"><rect x="8" y="10" wi
 const illoDur=`<svg viewBox="0 0 96 80" aria-hidden="true"><path d="M0 60L22 34L36 46L56 22L80 50L96 40V80H0z" fill="var(--lake2)"/><rect x="14" y="40" width="58" height="26" rx="7" fill="var(--lake)"/><rect x="20" y="45" width="12" height="9" rx="2" fill="#fff" opacity=".85"/><rect x="36" y="45" width="12" height="9" rx="2" fill="#fff" opacity=".85"/><rect x="52" y="45" width="14" height="9" rx="2" fill="#fff" opacity=".85"/><circle cx="26" cy="67" r="5" fill="var(--ink)"/><circle cx="60" cy="67" r="5" fill="var(--ink)"/><circle cx="76" cy="20" r="14" fill="var(--paper)" stroke="var(--coral)" stroke-width="3"/><path d="M76 12v8l6 4" stroke="var(--coral)" stroke-width="3" fill="none" stroke-linecap="round"/></svg>`;
 function openTrip(t,di){setRegion(t.region||'cc');
  if(t.multi){if(di==null){di=t.days.findIndex(d=>d.date===today);if(di<0)di=0}const d=t.days[di],o=originByName(d.origin),e=originByName(d.endOrigin);
-  const r=sim(d.seq,{t:tm(d.start),loc:'hub',deadline:tm(d.end),mult:d.mult,start:true,origin:o,endOrigin:e,stays:d.stays,at:d.at,win:d.win});
+  const r=sim(d.seq,{t:tm(d.start),loc:'hub',deadline:tm(d.end),mult:d.mult,start:true,origin:o,endOrigin:e,stays:d.stays,at:d.at,win:d.win,sunrise:d.sunrise});
   startTrip(d.seq,r?r.steps:[],{stays:d.stays,at:d.at,win:d.win,date:d.date,deadline:tm(d.end),mult:d.mult,tags:t.tags,title:t.title,origin:o,endOrigin:e});S.trip.saved=t;S.trip.autoEnd=!!d.autoEnd;S.trip.day=di;return}
  startTrip(t.seq,loadSaved(t),{stays:t.stays,at:t.at,win:t.win,date:t.date,deadline:tm(t.deadline),mult:t.mult,tags:t.tags,title:t.title,origin:originByName(t.origin)})}
-function loadSaved(t){setRegion(t.region||'cc');const r=sim(t.seq,{stays:t.stays,at:t.at,win:t.win,t:tm(t.start),loc:'hub',deadline:tm(t.deadline),mult:t.mult,start:true,origin:originByName(t.origin)});return r?r.steps:[]}
+function loadSaved(t){setRegion(t.region||'cc');const r=sim(t.seq,{stays:t.stays,at:t.at,win:t.win,t:tm(t.start),loc:'hub',deadline:tm(t.deadline),mult:t.mult,start:true,origin:originByName(t.origin),sunrise:t.sunrise});return r?r.steps:[]}
 const originList=()=>{const r=searchOrigins(S.fromQ);return r.length?r.map(o=>`<button type="button" class="opt${o.name===S.form.origin.name?' on':''}" data-act="pickOrigin" data-n="${esc(o.name)}" role="option"><b>${esc(o.name)}</b><small>${o.kind}${o.min?` · 환승 지점(${HUB.name})까지 ${o.min}분`:' · 버스 환승 지점'}</small></button>`).join(''):`<p class="hint" style="padding:10px 12px">'${esc(S.fromQ)}'에 맞는 곳이 없어요. 가까운 역이나 동네 이름으로 찾아보세요.</p>`};
 const originPicker=label=>`<div class="f"><span class="fl">${label}</span><button type="button" class="btn ghost locbtn" data-act="locFind"><span class="pin"></span>${S.loc.mode==='asking'&&S.loc.pendingQuick?'내 위치를 확인하는 중…':'내 위치로 출발지 찾기'}</button>${S.locMsg?`<p class="hint locmsg">${esc(S.locMsg)}</p>`:''}<div class="picked"><b>${esc(S.form.origin.name)}</b><small>${S.form.origin.kind}${S.form.origin.min?` · ${HUB.name}까지 ${S.form.origin.min}분`:''}</small></div>
  <input id="fromQ" class="search" type="search" value="${esc(S.fromQ)}" placeholder="역, 터미널, 동네, 숙소 검색 (초성 가능: ㄴㅊㅊ)" autocomplete="off" role="combobox" aria-expanded="${S.fromOpen||S.fromQ?'true':'false'}" aria-controls="fromList">
@@ -480,7 +492,7 @@ function locHTML(){const L=S.loc,T=S.trip;if(!T||L.mode==='off')return'';
  const onBus=T.steps.find(s=>s.k==='bus'&&s.dep<=now&&now<s.arr),nx=T.steps.find(s=>s.k==='bus'&&s.dep>=now),nm=T.steps.find(s=>(s.k==='walk'&&s.t>=now)||(s.k==='bus'&&s.dep>=now));
  let line='',warn='';
  if(onBus)line=`버스 안 · ${esc(onBus.to)}까지 약 ${onBus.arr-now}분`;
- else if(nm&&nm.k==='walk')line=`다음 이동 <b>${hm(nm.t)}</b> · ${esc(nm.to)}(으)로 도보·시내버스 ${nm.min}분`;
+ else if(nm&&nm.k==='walk')line=`다음 이동 <b>${hm(nm.t)}</b> · ${esc(nm.to)}(으)로 ${nm.taxi?'택시':'도보·시내버스'} ${nm.min}분`;
  else if(nx){const dS=distM(me.ll,llOfName(nx.from)),wm=Math.ceil(dS/67),go=nx.dep-wm-3;
   if(dS<120)line=`${esc(nx.from)} 정류장 바로 앞이에요 · ${hm(nx.dep)} ${nx.no}번 버스`;
   else{line=`${esc(nx.from)} 정류장까지 ${fmtD(dS)} · 걸어서 약 ${wm}분 → <b>${hm(Math.max(go,now))}</b>에 출발하세요`;
@@ -530,7 +542,7 @@ function guideHTML(){const T=S.trip;if(!T)return'';const now=T.now,st=T.steps;
   how=d<60?(isBus?`<p class="gnow">정류장에 도착했어요 · ${nm.no}번 버스 ${hm(nm.dep)} 승차</p>`:`<p class="gnow">도착했어요</p>`)
    :`<div class="gdir"><span class="garr" style="transform:rotate(${Math.round(b)}deg)" aria-hidden="true">↑</span><div><b>${dirName(b)}쪽으로 ${fmtD(d)}</b><p>걸어서 약 ${wm}분${isBus?` · ${hm(nm.dep-wm-3)}까지 출발하세요`:''}</p></div></div>`}
  else how=`<p class="gnote">위치를 켜면 여기서 정류장까지 방향과 거리를 바로 알려 드려요. <button class="mini" data-act="locAllow">위치 켜기</button></p>`;
- return`<div class="guide"><div class="gh"><span class="gk">지금 할 일</span><b>${isBus?`${nm.no}번 버스 타러 ${esc(label)}`:`${esc(label)}(으)로 이동`}</b><p>${isBus?`${hm(nm.dep)} 출발 · ${esc(nm.to)} 방면`:`도보·시내버스 약 ${nm.min}분`}</p></div>${how}${isBus?liveHTML(tg):''}${guideMap(me,tg,label)}<p class="gfoot">지도 위쪽이 북쪽이에요.${KREADY?'':' 카카오 키를 넣으면 이 자리에 실제 지도가 나와요.'}</p></div>`}
+ return`<div class="guide"><div class="gh"><span class="gk">지금 할 일</span><b>${isBus?`${nm.no}번 버스 타러 ${esc(label)}`:`${esc(label)}(으)로 이동`}</b><p>${isBus?`${hm(nm.dep)} 출발 · ${esc(nm.to)} 방면`:`${nm.taxi?'택시':'도보·시내버스'} 약 ${nm.min}분`}</p></div>${how}${isBus?liveHTML(tg):''}${guideMap(me,tg,label)}<p class="gfoot">지도 위쪽이 북쪽이에요.${KREADY?'':' 카카오 키를 넣으면 이 자리에 실제 지도가 나와요.'}</p></div>`}
 function locAllow(){S.loc={mode:'asking',pendingQuick:S.loc.pendingQuick};updLoc();
  const fail=()=>{if(S.loc.mode==='real')return;const q=S.loc.pendingQuick;S.loc={mode:'demo',far:false};if(q){S.locMsg='위치를 받을 수 없어요. 아래에서 출발지를 검색해 주세요. (이 미리보기 화면은 브라우저가 위치 권한을 막아 두었어요. 실제 앱에서는 휴대폰 GPS로 찾아요.)';render()}else updLoc()};
  if(!navigator.geolocation)return fail();
@@ -542,6 +554,8 @@ function applyQuickLoc(){S.loc.pendingQuick=false;const nr=nearestAll(S.loc.ll);
  S.locMsg=`현재 위치로 찾았어요 · 지역 ${REGION.name} · 가장 가까운 곳 ${nr.name} (${fmtD(nr.d)})`;S.fromQ='';S.fromOpen=false;S.exclude=[];render()}
 function updLoc(){const g=document.getElementById('guidebox');if(g){g.innerHTML=guideHTML();drawK()}const b=document.getElementById('locbox');if(b){b.innerHTML=locHTML();const pm=document.getElementById('perm');if(pm&&S.loc.mode!=='off')pm.remove()}}
 function sunAlert(p,dl=tm(S.form.deadline),field='deadline',day=null){const z=sunNow(),tags0=S.allTags||[],out=[];let tags=tags0;
+ if(p.sunrise){const sr=p.sunrise,sp=byId(sr.id),org=day?day.origin:S.form.origin;out.push(`<div class="sunok">일출 ${hm(z.rise)} · ${esc(sp.name)}에서 해돋이를 보도록 일정 맨 앞에 넣었어요. ${esc(org.name)}에서 ${hm(sr.start)}에 ${sr.mode==='taxi'?`택시로 출발해요(약 ${sr.min}분, 버스가 다니기 전이에요)`:`걸어서 출발해요(약 ${sr.min}분)`}.</div>`);tags=tags.filter(t=>t!=='일출')}
+ else 
  if(day&&day.i>0&&tags.includes('일출')){const st=day.origin;let b=null;P.filter(x=>viewSpot(x)).forEach(x=>{const d=distM(st.ll,x.ll);if(!b||d<b.d)b={x,d}});
   if(b&&b.d<2500){const w=Math.ceil(b.d/67);out.push(`<div class="sunok">일출 ${hm(z.rise)} · 숙소(${esc(st.name)})에서 ${esc(b.x.name)}까지 걸어서 약 ${w}분이에요. ${hm(z.rise-w-10)}에 나가면 해돋이를 볼 수 있어요.</div>`)}
   else out.push(`<div class="alert">숙소에서 바다가 멀어서 걸어서 일출을 보기 어려워요. 숙소를 바닷가(${esc((ORIGINS.find(x=>x.kind==='숙소')||{}).name||'해변 근처')})로 잡으면 걸어서 볼 수 있어요.</div>`)}
@@ -570,7 +584,7 @@ function pre3multi(){const d=S.multi[S.tab],p=d.plan;S.viewDate=d.date;
   <button class="btn" data-act="confirm">이 일정으로 확정</button><button class="btn ghost" data-act="go" data-to="pre2">키워드 바꾸기</button>`;S.viewDate=null;return html}
 function edCtx(){if(S.multi){const d=S.multi[S.tab];return{p:d.plan,start:d.start,deadline:d.end,origin:d.origin,endOrigin:d.endOrigin,all:S.multi.flatMap(x=>x.plan.seq)}}
  const p=S.plans[S.tab];return{p,start:tm(S.form.start),deadline:tm(S.form.deadline),origin:S.form.origin,endOrigin:S.form.origin,all:p.seq}}
-function resim(c){const p=c.p;p.stays=p.stays||{};p.at=p.at||{};p.win=p.win||{};const r=sim(p.seq,{t:c.start,loc:'hub',deadline:c.deadline,mult:p.mult,start:true,origin:c.origin,endOrigin:c.endOrigin,stays:p.stays,at:p.at,win:p.win});
+function resim(c){const p=c.p;p.stays=p.stays||{};p.at=p.at||{};p.win=p.win||{};const r=sim(p.seq,{t:c.start,loc:'hub',deadline:c.deadline,mult:p.mult,start:true,origin:c.origin,endOrigin:c.endOrigin,stays:p.stays,at:p.at,win:p.win,sunrise:p.sunrise});
  if(!r)return false;p.steps=r.steps;p.end=r.end;p.wait=r.wait;p.late=r.ok?0:Math.max(1,r.end-c.deadline);p.tight=!r.ok&&r.end<=c.deadline;return true}
 function edApply(fn){const c=edCtx(),p=c.p,snap=JSON.stringify({seq:p.seq,stays:p.stays||{},at:p.at||{},win:p.win||{}});p.stays=p.stays||{};p.at=p.at||{};p.win=p.win||{};fn(p,c);
  if(!resim(c)){const f=SIMFAIL,o=JSON.parse(snap);p.seq=o.seq;p.stays=o.stays;p.at=o.at;p.win=o.win;resim(c);S.edMsg=`${(byId(f)||{name:'그 장소'}).name}에 맞는 버스가 더 없어서 바꾸지 않았어요. 시간을 조금 당겨 보세요.`}else S.edMsg=''}
@@ -681,7 +695,7 @@ const screens={
   <div class="sum"><span><b>${p.seq.length}곳</b></span><span>정류장 대기 <b>${p.wait}분</b></span><span>${esc(S.form.origin.name)} 도착 <b>${hm(p.end)}</b></span></div>
   <p class="why">${p.matched.length?`'${p.matched.join("', '")}' 키워드에 맞는 곳을 골랐고, `:''}${p.seq.length>1?'배차가 드문 곳을 먼저 넣어 고립되지 않게 순서를 맞췄어요.':'버스 시간에 맞춰 머무는 시간을 정했어요.'}${(()=>{const z=sunNow(),tg=S.allTags||[],x=[];if(tg.includes('일몰')){const st=p.steps.find(q=>sees(q,z.set));if(st)x.push(` 일몰(${hm(z.set)}) 때 ${st.p.name}에 있도록 맞췄어요.`)}if(tg.includes('일출')){const st=p.steps.find(q=>sees(q,z.rise));if(st)x.push(` 일출(${hm(z.rise)}) 때 ${st.p.name}에 있도록 맞췄어요.`)}return esc(x.join(''))})()}</p>
   ${(()=>{const tx=S.parsed||{},bits=[];if(tx.origin)bits.push(`출발지 ${tx.origin.name}`);if(tx.must&&tx.must.length)bits.push('가고 싶은 곳 '+tx.must.map(i=>byId(i).name).join(', '));if(tx.tags&&tx.tags.length)bits.push('키워드 '+tx.tags.join(', '));if(tx.start!=null)bits.push(hm(tx.start)+' 출발');if(tx.deadline!=null)bits.push(hm(tx.deadline)+' 귀가');
-   const miss=(S.must||[]).filter(i=>!p.seq.includes(i));
+   const miss=(S.must||[]).filter(i=>!p.seq.includes(i)&&!(p.sunrise&&p.sunrise.id===i));
    return(bits.length?`<p class="hint">입력에서 읽은 내용: ${esc(bits.join(' · '))}</p>`:'')+(S.short?`<p class="alert">시간이 짧아서 머무는 시간을 평소의 절반으로 줄여 넣었어요.</p>`:'')+(miss.length?`<p class="alert">${miss.map(i=>byId(i).name).join(', ')}은(는) 귀가 시각 안에 다녀올 수 없어 이 안에서는 빠졌어요. 귀가 시각을 늦추거나 다른 장소를 빼 보세요.</p>`:'')})()}
   ${edBar()}
   ${routeMap(p.steps)}
@@ -752,16 +766,19 @@ function build(){S.edit=false;S.edMsg='';S.edLog=[];const rg=regionOf(S.text);if
    const autoStart=i>0&&!!S.form.morningAuto,autoEnd=i<n-1&&!!S.form.nightAuto;
    const end=i===n-1?tm(S.form.deadline):autoEnd?NIGHT_CAP:tm(S.form.night);
    const base={sun,deadline:end,tags,must:tx.must.filter(m=>!used.includes(m)),exclude:S.exclude.concat(used),origin,endOrigin};
+   if(i>0&&tags.includes('일출'))base.sunrise=srPlan(origin,sun,base.must,base.exclude);
    let start=i===0?tm(S.form.start):tm(S.form.morning),p=null;
-   if(autoStart){let lo=tm('07:30');if(tags.includes('일출'))lo=Math.max(lo,sun.rise+40);let best=null;
+   if(base.sunrise){p=makePlans({...base,start})[0];if(p)start=base.sunrise.start}
+   else if(autoStart){let lo=tm('07:30');if(tags.includes('일출'))lo=Math.max(lo,sun.rise+40);let best=null;
     for(let t0=lo;t0<=Math.max(lo,tm('10:00'));t0+=10){const q=makePlans({...base,start:t0})[0];if(!q)continue;const sc=q.v+.004*(t0-lo);if(!best||sc>best.sc)best={sc,q,t0}}
     if(best){p=best.q;start=best.t0}}
    else p=makePlans({...base,start})[0];
-   if(!p){const r=sim([],{t:start,loc:'hub',deadline:end,start:true,origin,endOrigin});p={seq:[],steps:r.steps,end:r.end,wait:0,mult:1,matched:[]}}
-   used.push(...p.seq);days.push({i,n,date,start,end,origin,endOrigin,plan:p,autoStart,autoEnd})}
+   if(!p){const r=sim([],{t:start,loc:'hub',deadline:end,start:true,origin,endOrigin,sunrise:base.sunrise});p={sunrise:base.sunrise||null,seq:[],steps:r.steps,end:r.end,wait:0,mult:1,matched:[]}}
+   used.push(...p.seq,...(p.sunrise?[p.sunrise.id]:[]));days.push({i,n,date,start,end,origin,endOrigin,plan:p,autoStart,autoEnd})}
   const miss=tx.must.filter(m=>!used.includes(m));S.multi=days;S.multiMiss=miss;S.msg='';S.tab=Math.min(S.tab,n-1);S.screen='pre3';return}
  S.multi=null;
- const po={sun:sunTimes(S.form.date,HUB.ll),start:tm(S.form.start),deadline:tm(S.form.deadline),tags,must:tx.must,exclude:S.exclude,origin:S.form.origin};
+ const sun0=sunTimes(S.form.date,HUB.ll),po={sun:sun0,start:tm(S.form.start),deadline:tm(S.form.deadline),tags,must:tx.must,exclude:S.exclude,origin:S.form.origin};
+ if(tags.includes('일출'))po.sunrise=srPlan(S.form.origin,sun0,tx.must,S.exclude);
  let plans=makePlans(po);S.short=false;
  if(tx.must.length&&(!plans.length||!plans[0].seq.some(i=>tx.must.includes(i)))){const sp=makePlans({...po,mult:.5});if(sp.length&&sp[0].seq.some(i=>tx.must.includes(i))){plans=sp;S.short=true}}
  if(!plans.length&&tx.must.length){S.msg=`${tx.must.map(i=>byId(i).name).join(', ')}은(는) ${S.form.start}~${S.form.deadline} 사이에는 버스로 다녀올 수 없어요. 출발을 당기거나 귀가 시각을 늦춰 보세요.`;S.screen='pre2';return}
@@ -877,9 +894,9 @@ document.addEventListener('click',e=>{const el=e.target.closest('[data-act]');if
   case'unexclude':S.exclude=[];build();break;
   case'confirm':{if(S.multi){const all=S.multi.flatMap(d=>d.plan.seq).map(i=>byId(i).name);
     saved.unshift({multi:true,title:DUR[S.multi.length-1]+' · '+all.slice(0,2).join(' · ')+(all.length>2?` 외 ${all.length-2}곳`:''),region:REGION.id,date:S.form.date,origin:S.form.origin.name,start:S.form.start,deadline:S.form.deadline,mult:S.multi[0].plan.mult,tags:S.allTags,seq:S.multi.flatMap(d=>d.plan.seq),
-     days:S.multi.map(d=>({autoEnd:d.autoEnd,date:d.date,start:hm(d.start),end:hm(d.end),origin:d.origin.name,endOrigin:d.endOrigin.name,seq:d.plan.seq,mult:d.plan.mult,stays:d.plan.stays||{},at:d.plan.at||{},win:d.plan.win||{}}))});persist();S.screen='pre4';break}
+     days:S.multi.map(d=>({sunrise:d.plan.sunrise||null,autoEnd:d.autoEnd,date:d.date,start:hm(d.start),end:hm(d.end),origin:d.origin.name,endOrigin:d.endOrigin.name,seq:d.plan.seq,mult:d.plan.mult,stays:d.plan.stays||{},at:d.plan.at||{},win:d.plan.win||{}}))});persist();S.screen='pre4';break}
    const p=S.plans[S.tab],names=p.seq.map(i=>byId(i).name);
-   saved.unshift({title:names.slice(0,2).join(' · ')+(names.length>2?` 외 ${names.length-2}곳`:''),region:REGION.id,date:S.form.date,origin:S.form.origin.name,start:S.form.start,deadline:S.form.deadline,mult:p.mult,seq:p.seq,stays:p.stays||{},at:p.at||{},win:p.win||{},tags:S.allTags});persist();S.screen='pre4';break}
+   saved.unshift({title:names.slice(0,2).join(' · ')+(names.length>2?` 외 ${names.length-2}곳`:''),region:REGION.id,date:S.form.date,origin:S.form.origin.name,start:S.form.start,deadline:S.form.deadline,mult:p.mult,seq:p.seq,stays:p.stays||{},at:p.at||{},win:p.win||{},tags:S.allTags,sunrise:p.sunrise||null});persist();S.screen='pre4';break}
   case'openSaved':openTrip(saved[+el.dataset.i]);break;
   case'tripDay':openTrip(S.trip.saved,+el.dataset.i);break;
   case'delSaved':saved.splice(+el.dataset.i,1);persist();break;
